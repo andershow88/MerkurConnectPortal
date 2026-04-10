@@ -1,0 +1,171 @@
+@model DokumentListViewModel
+@{
+    var isObjektView = Model.ObjektId.HasValue;
+    ViewData["Title"] = isObjektView ? $"Dokumente – {Model.ObjektName}" : "Dokumente";
+    var breadcrumb = isObjektView
+        ? $"<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><a href='/Objekte'>Objekte</a><span class='separator'>/</span><a href='/Objekte/Details/{Model.ObjektId}'>@Model.ObjektName</a><span class='separator'>/</span><span>Dokumente</span>"
+        : "<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><span>Dokumente</span>";
+    ViewData["Breadcrumb"] = breadcrumb;
+}
+
+<div class="mc-page-header">
+    <div>
+        @if (isObjektView)
+        {
+            <div class="mb-1">
+                <a asp-controller="Objekte" asp-action="Details" asp-route-id="@Model.ObjektId"
+                   class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                    <i class="bi bi-arrow-left"></i> Zurück zum Objekt
+                </a>
+            </div>
+            <h1 class="mc-page-title">
+                <i class="bi bi-folder2-open me-2" style="color:var(--mc-blue);font-size:1.3rem;"></i>
+                Dokumente
+            </h1>
+            <p class="mc-page-subtitle">@Model.ObjektName</p>
+        }
+        else
+        {
+            <h1 class="mc-page-title">
+                <i class="bi bi-folder2-open me-2" style="color:var(--mc-blue);font-size:1.3rem;"></i>
+                Alle Dokumente
+            </h1>
+            <p class="mc-page-subtitle">Dokumentenübersicht für Ihr gesamtes Portfolio</p>
+        }
+    </div>
+    <div class="d-flex gap-2">
+        @if (isObjektView)
+        {
+            <a asp-controller="Dokumente" asp-action="Upload" asp-route-objektId="@Model.ObjektId"
+               class="btn-mc-primary">
+                <i class="bi bi-upload"></i> Dokument hochladen
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Filter -->
+@if (!isObjektView)
+{
+    <form method="get" asp-action="Index">
+        <div class="mc-filter-bar">
+            <label class="text-muted small me-1">Kategorie:</label>
+            <select name="kategorie" class="form-select form-select-sm" style="max-width:220px;" onchange="this.form.submit()">
+                @foreach (var opt in Model.KategorieOptionen)
+                {
+                    <option value="@opt.Wert" selected="@(Model.KategorieFilter == opt.Wert)">@opt.Bezeichnung</option>
+                }
+            </select>
+            @if (!string.IsNullOrWhiteSpace(Model.KategorieFilter))
+            {
+                <a asp-action="Index" class="btn-mc-ghost"><i class="bi bi-x-circle"></i> Zurücksetzen</a>
+            }
+        </div>
+    </form>
+}
+
+<!-- Dokumentenliste -->
+<div class="mc-card">
+    <div class="mc-card-header">
+        <h2 class="mc-card-title">
+            <i class="bi bi-files"></i>
+            Dokumente
+        </h2>
+        <span class="mc-badge badge-primary">@Model.Dokumente.Count Dokument(e)</span>
+    </div>
+    <div class="mc-card-body" style="padding:0;">
+        <div class="mc-table-wrapper">
+            <table class="mc-table">
+                <thead>
+                    <tr>
+                        <th>Dokument</th>
+                        @if (!isObjektView) { <th>Objekt</th> }
+                        <th>Kategorie</th>
+                        <th>Hochgeladen von</th>
+                        <th>Datum</th>
+                        <th>Größe</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dok in Model.Dokumente)
+                    {
+                        var ext = System.IO.Path.GetExtension(dok.Dateiname).ToLowerInvariant();
+                        var iconClass = ext == ".pdf" ? "pdf"
+                            : ext is ".xlsx" or ".xls" ? "excel"
+                            : ext is ".docx" or ".doc" ? "word"
+                            : "other";
+                        var iconName = ext == ".pdf" ? "bi-file-earmark-pdf-fill"
+                            : ext is ".xlsx" or ".xls" ? "bi-file-earmark-excel-fill"
+                            : ext is ".docx" or ".doc" ? "bi-file-earmark-word-fill"
+                            : "bi-file-earmark-fill";
+
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="mc-doc-icon @iconClass">
+                                        <i class="bi @iconName"></i>
+                                    </div>
+                                    <span class="fw-semibold" style="font-size:0.85rem;">@dok.Dateiname</span>
+                                </div>
+                            </td>
+                            @if (!isObjektView)
+                            {
+                                <td>
+                                    <a asp-controller="Objekte" asp-action="Details" asp-route-id="@dok.ObjektId"
+                                       style="font-size:0.82rem; color:var(--mc-blue);">
+                                        @dok.ObjektName
+                                    </a>
+                                </td>
+                            }
+                            <td>
+                                <span class="mc-badge badge-secondary">@dok.Kategorie</span>
+                            </td>
+                            <td style="font-size:0.82rem;">@dok.HochgeladenVon</td>
+                            <td style="font-size:0.82rem; white-space:nowrap;">
+                                @dok.HochgeladenAm.ToString("dd.MM.yyyy")
+                                <div class="text-muted" style="font-size:0.72rem;">@dok.HochgeladenAm.ToString("HH:mm") Uhr</div>
+                            </td>
+                            <td style="font-size:0.82rem; white-space:nowrap;">@dok.DateigroesseFormatiert</td>
+                            <td>
+                                @if (dok.Status == "Aktiv")
+                                {
+                                    <span class="mc-badge badge-success"><i class="bi bi-check-circle-fill"></i> @dok.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="mc-badge badge-secondary">@dok.Status</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-controller="Dokumente" asp-action="Download" asp-route-id="@dok.Id"
+                                   class="btn-mc-outline" style="font-size:0.78rem; padding:0.3rem 0.75rem;"
+                                   data-bs-toggle="tooltip" title="Herunterladen">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Dokumente.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-folder2 fs-2 d-block mb-2"></i>
+                                Noch keine Dokumente vorhanden
+                                @if (isObjektView)
+                                {
+                                    <br /><a asp-controller="Dokumente" asp-action="Upload"
+                                             asp-route-objektId="@Model.ObjektId"
+                                             class="btn-mc-primary mt-2">
+                                        <i class="bi bi-upload"></i> Erstes Dokument hochladen
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

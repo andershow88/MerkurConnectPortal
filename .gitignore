@@ -1,0 +1,22 @@
+## .NET / ASP.NET Core
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+*.db
+*.db-wal
+*.db-shm
+
+## Uploads
+src/MerkurConnectPortal.Web/wwwroot/uploads/*
+!src/MerkurConnectPortal.Web/wwwroot/uploads/.gitkeep
+
+## Publish
+publish/
+*.publish.xml
+
+## Logs
+logs/
+*.log

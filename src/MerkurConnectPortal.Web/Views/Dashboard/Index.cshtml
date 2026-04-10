@@ -1,0 +1,160 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["Breadcrumb"] = "<span>Dashboard</span>";
+    var d = Model.Dashboard;
+    var gesamtVerkaufsquote = d.GesamtEinheiten > 0
+        ? (decimal)d.GesamtVerkaufteEinheiten / d.GesamtEinheiten * 100
+        : 0;
+}
+
+<!-- Page Header -->
+<div class="mc-page-header">
+    <div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-speedometer2 me-2" style="color:var(--mc-blue);font-size:1.3rem;"></i>
+            Übersicht
+        </h1>
+        <p class="mc-page-subtitle">Willkommen, @User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value – Portfolio von @d.PartnerBankName</p>
+    </div>
+    <div class="text-muted small">
+        Stand: @DateTime.Now.ToString("dd.MM.yyyy HH:mm") Uhr
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="mc-kpi-grid">
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon navy"><i class="bi bi-buildings-fill"></i></div>
+        <div class="mc-kpi-label">Objekte gesamt</div>
+        <div class="mc-kpi-value">@d.AnzahlObjekte</div>
+        <div class="mc-kpi-sub">Unterbeteiligte Bauträgerprojekte</div>
+    </div>
+
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon blue"><i class="bi bi-cash-stack"></i></div>
+        <div class="mc-kpi-label">Metakontosaldo gesamt</div>
+        <div class="mc-kpi-value text-primary text-currency">@d.GesamtMetakontosaldo.ToString("N0") €</div>
+        <div class="mc-kpi-sub">Über alle Objekte</div>
+    </div>
+
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon gold"><i class="bi bi-piggy-bank-fill"></i></div>
+        <div class="mc-kpi-label">Kaufpreissammelkonto</div>
+        <div class="mc-kpi-value text-warning text-currency">@d.GesamtKaufpreissammelkonto.ToString("N0") €</div>
+        <div class="mc-kpi-sub">Gesamt aller Objekte</div>
+    </div>
+
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon purple"><i class="bi bi-shield-fill-check"></i></div>
+        <div class="mc-kpi-label">Avale gesamt</div>
+        <div class="mc-kpi-value text-currency">@d.GesamtAvale.ToString("N0") €</div>
+        <div class="mc-kpi-sub">Bürgschaften</div>
+    </div>
+
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon navy"><i class="bi bi-house-fill"></i></div>
+        <div class="mc-kpi-label">Einheiten gesamt</div>
+        <div class="mc-kpi-value">@d.GesamtEinheiten</div>
+        <div class="mc-kpi-sub">@d.GesamtVerkaufteEinheiten verkauft</div>
+    </div>
+
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon green"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="mc-kpi-label">Verkaufsquote</div>
+        <div class="mc-kpi-value text-success">@gesamtVerkaufsquote.ToString("N1") %</div>
+        <div class="mc-kpi-sub">Durchschnitt Gesamtportfolio</div>
+    </div>
+
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon blue"><i class="bi bi-hammer"></i></div>
+        <div class="mc-kpi-label">Ø Bautenstand</div>
+        <div class="mc-kpi-value">@d.DurchschnittlicheBautenstand.ToString("N0") %</div>
+        <div class="mc-kpi-sub">Über alle aktiven Objekte</div>
+    </div>
+</div>
+
+<!-- Objektübersicht -->
+<div class="mc-card">
+    <div class="mc-card-header">
+        <h2 class="mc-card-title">
+            <i class="bi bi-list-ul"></i>
+            Ihre Objekte
+        </h2>
+        <a asp-controller="Objekte" asp-action="Index" class="btn-mc-outline" style="font-size:0.8rem; padding: 0.35rem 0.9rem;">
+            <i class="bi bi-arrow-right"></i> Alle anzeigen
+        </a>
+    </div>
+    <div class="mc-card-body" style="padding:0;">
+        <div class="mc-table-wrapper">
+            <table class="mc-table">
+                <thead>
+                    <tr>
+                        <th>Objekt</th>
+                        <th>Standort</th>
+                        <th>Status</th>
+                        <th class="text-end">UB-Quote</th>
+                        <th class="text-end">Metakonto</th>
+                        <th class="text-end">Einheiten</th>
+                        <th>Bautenstand</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var obj in d.Objekte)
+                    {
+                        var progressClass = obj.BautenstandProzent >= 80 ? "green"
+                            : obj.BautenstandProzent >= 40 ? ""
+                            : "yellow";
+
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@obj.Objektname</div>
+                                <div class="text-muted" style="font-size:0.74rem;">@obj.Bautraeger</div>
+                            </td>
+                            <td>
+                                <i class="bi bi-geo-alt text-muted me-1" style="font-size:0.8rem;"></i>
+                                @obj.Standort
+                            </td>
+                            <td>
+                                <span class="mc-badge @obj.StatusCssClass">@obj.Status</span>
+                            </td>
+                            <td class="text-end fw-semibold">@obj.Unterbeteiligungsquote.ToString("N2") %</td>
+                            <td class="text-end text-currency">@obj.Metakontosaldo.ToString("N0") €</td>
+                            <td class="text-end">
+                                @obj.EinheitenVerkauft / @obj.EinheitenGesamt
+                                <div class="text-muted" style="font-size:0.72rem;">@obj.Verkaufsquote.ToString("N1") %</div>
+                            </td>
+                            <td style="min-width:120px;">
+                                <div class="mc-progress-label">
+                                    <span></span>
+                                    <span>@obj.BautenstandProzent.ToString("N0") %</span>
+                                </div>
+                                <div class="mc-progress">
+                                    <div class="mc-progress-bar @progressClass"
+                                         data-width="@obj.BautenstandProzent"
+                                         style="width:0%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <a asp-controller="Objekte" asp-action="Details" asp-route-id="@obj.Id"
+                                   class="btn-mc-ghost" style="font-size:0.78rem;">
+                                    <i class="bi bi-chevron-right"></i> Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!d.Objekte.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                Keine Objekte vorhanden
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

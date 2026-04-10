@@ -1,0 +1,252 @@
+@model ObjektDetailViewModel
+@{
+    var obj = Model.Objekt;
+    ViewData["Title"] = obj.Objektname;
+    ViewData["Breadcrumb"] = $"<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><a href='/Objekte'>Objekte</a><span class='separator'>/</span><span>{obj.Objektname}</span>";
+
+    var progressClass = obj.BautenstandProzent >= 80 ? "green"
+        : obj.BautenstandProzent >= 40 ? ""
+        : "yellow";
+    var verkaufsProgressClass = obj.Verkaufsquote >= 80 ? "green"
+        : obj.Verkaufsquote >= 50 ? ""
+        : "yellow";
+}
+
+<!-- Page Header -->
+<div class="mc-page-header">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a asp-controller="Objekte" asp-action="Index" class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                <i class="bi bi-arrow-left"></i> Zurück
+            </a>
+        </div>
+        <h1 class="mc-page-title">@obj.Objektname</h1>
+        <p class="mc-page-subtitle">
+            <i class="bi bi-geo-alt me-1"></i>@obj.Standort &nbsp;·&nbsp;
+            <i class="bi bi-building me-1"></i>@obj.Bautraeger
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="mc-badge @obj.StatusCssClass" style="font-size:0.82rem; padding:0.4rem 0.9rem;">
+            @obj.Status
+        </span>
+        <a asp-controller="Dokumente" asp-action="Objekt" asp-route-objektId="@obj.Id"
+           class="btn-mc-outline">
+            <i class="bi bi-folder2-open"></i> Dokumente (@obj.AnzahlDokumente)
+        </a>
+        <a asp-controller="Nachrichten" asp-action="Index" asp-route-objektId="@obj.Id"
+           class="btn-mc-primary">
+            <i class="bi bi-chat-dots"></i> Kommunikation
+        </a>
+    </div>
+</div>
+
+<!-- Unterbeteiligungsinfo -->
+<div class="mc-card border-start-blue mb-3">
+    <div class="mc-card-body-sm">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <div class="mc-kpi-label">Unterbeteiligungsquote</div>
+                <div class="mc-kpi-value" style="font-size:2rem; color:var(--mc-blue);">
+                    @obj.Unterbeteiligungsquote.ToString("N2") %
+                </div>
+            </div>
+            <div class="flex-grow-1" style="border-left:1px solid var(--mc-border); padding-left:1.5rem;">
+                <div class="text-muted small">
+                    Ihre Bank ist zu <strong>@obj.Unterbeteiligungsquote.ToString("N2") %</strong> an diesem Bauträgerprojekt unterbeteiligt.
+                    Der Gesamtdarlehensbestand wird anteilig auf Ihr Engagement angerechnet.
+                </div>
+            </div>
+            <div class="text-muted small">
+                Letzte Aktualisierung:<br />
+                <strong>@obj.LetzteAktualisierung.ToString("dd.MM.yyyy")</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Finanzdaten -->
+    <div class="col-lg-6">
+        <div class="mc-card h-100">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-cash-stack"></i> Finanzdaten</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="mc-info-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Metakontosaldo</div>
+                        <div class="mc-info-value large text-currency">@obj.Metakontosaldo.ToString("N0") €</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Kaufpreissammelkonto</div>
+                        <div class="mc-info-value large text-currency">@obj.Kaufpreissammelkontosaldo.ToString("N0") €</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Avale</div>
+                        <div class="mc-info-value text-currency">@obj.Avale.ToString("N0") €</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Status</div>
+                        <span class="mc-badge @obj.StatusCssClass">@obj.Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vermarktung -->
+    <div class="col-lg-6">
+        <div class="mc-card h-100">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-house-door"></i> Vermarktung</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="mc-info-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:1rem;">
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Einheiten gesamt</div>
+                        <div class="mc-info-value large">@obj.EinheitenGesamt</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Einheiten verkauft</div>
+                        <div class="mc-info-value large text-success">@obj.EinheitenVerkauft</div>
+                    </div>
+                </div>
+                <div class="mc-progress-label">
+                    <span class="fw-semibold" style="font-size:0.8rem;">Verkaufsquote</span>
+                    <span class="fw-bold">@obj.Verkaufsquote.ToString("N1") %</span>
+                </div>
+                <div class="mc-progress" style="height:10px;">
+                    <div class="mc-progress-bar @verkaufsProgressClass"
+                         data-width="@obj.Verkaufsquote"
+                         style="width:0%"></div>
+                </div>
+                <div class="text-muted small mt-2">
+                    @(obj.EinheitenGesamt - obj.EinheitenVerkauft) Einheiten noch verfügbar
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Baufortschritt -->
+    <div class="col-12">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-hammer"></i> Baufortschritt</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center mb-3 mb-md-0">
+                        <div style="font-size:3rem; font-weight:800; color:var(--mc-navy); line-height:1;">
+                            @obj.BautenstandProzent.ToString("N0") %
+                        </div>
+                        <div class="text-muted small">Bautenstand</div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted small">Baubeginn</span>
+                            <span class="fw-semibold small">Aktuell: @obj.BautenstandProzent.ToString("N0") %</span>
+                            <span class="text-muted small">Fertigstellung</span>
+                        </div>
+                        <div class="mc-progress" style="height:20px; border-radius:6px;">
+                            <div class="mc-progress-bar @progressClass"
+                                 data-width="@obj.BautenstandProzent"
+                                 style="width:0%; border-radius:6px;"></div>
+                        </div>
+                        <div class="d-flex gap-3 mt-2 flex-wrap">
+                            <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i>Stand: @obj.LetzteAktualisierung.ToString("dd.MM.yyyy")</span>
+                            @if (obj.BautenstandProzent >= 100)
+                            {
+                                <span class="mc-badge badge-success"><i class="bi bi-check-circle-fill"></i> Fertiggestellt</span>
+                            }
+                            else if (obj.BautenstandProzent >= 50)
+                            {
+                                <span class="mc-badge badge-primary"><i class="bi bi-tools"></i> Im Bau – Fortgeschritten</span>
+                            }
+                            else
+                            {
+                                <span class="mc-badge badge-warning"><i class="bi bi-clock"></i> Im Bau – Frühe Phase</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Letzte Dokumente -->
+    @if (Model.LetzteDokumente.Any())
+    {
+        <div class="col-lg-6">
+            <div class="mc-card">
+                <div class="mc-card-header">
+                    <h2 class="mc-card-title"><i class="bi bi-file-earmark-text"></i> Neueste Dokumente</h2>
+                    <a asp-controller="Dokumente" asp-action="Objekt" asp-route-objektId="@obj.Id"
+                       class="btn-mc-ghost" style="font-size:0.78rem;">Alle anzeigen</a>
+                </div>
+                <div class="mc-card-body" style="padding:0;">
+                    <table class="mc-table">
+                        <tbody>
+                            @foreach (var dok in Model.LetzteDokumente)
+                            {
+                                var ext = System.IO.Path.GetExtension(dok.Dateiname).ToLowerInvariant();
+                                var iconClass = ext == ".pdf" ? "pdf" : ext is ".xlsx" or ".xls" ? "excel" : ext is ".docx" or ".doc" ? "word" : "other";
+                                var iconName = ext == ".pdf" ? "bi-file-earmark-pdf-fill" : ext is ".xlsx" or ".xls" ? "bi-file-earmark-excel-fill" : "bi-file-earmark-fill";
+
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="mc-doc-icon @iconClass"><i class="bi @iconName"></i></div>
+                                            <div>
+                                                <div class="fw-semibold" style="font-size:0.82rem;">@dok.Dateiname</div>
+                                                <div class="text-muted" style="font-size:0.72rem;">@dok.Kategorie · @dok.HochgeladenAm.ToString("dd.MM.yyyy")</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-controller="Dokumente" asp-action="Download" asp-route-id="@dok.Id"
+                                           class="btn-mc-ghost" style="font-size:0.75rem;">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mc-card-body-sm" style="border-top:1px solid var(--mc-border);">
+                    <a asp-controller="Dokumente" asp-action="Upload" asp-route-objektId="@obj.Id"
+                       class="btn-mc-outline" style="font-size:0.82rem;">
+                        <i class="bi bi-upload"></i> Dokument hochladen
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Letzte Kommunikation -->
+    @if (Model.LetzteNachrichten.Any())
+    {
+        <div class="col-lg-6">
+            <div class="mc-card">
+                <div class="mc-card-header">
+                    <h2 class="mc-card-title"><i class="bi bi-chat-dots"></i> Letzte Nachrichten</h2>
+                    <a asp-controller="Nachrichten" asp-action="Index" asp-route-objektId="@obj.Id"
+                       class="btn-mc-ghost" style="font-size:0.78rem;">Alle / Antworten</a>
+                </div>
+                <div class="mc-card-body">
+                    @foreach (var msg in Model.LetzteNachrichten)
+                    {
+                        <div class="mb-2 p-2 rounded" style="background:#f7f9fc; border:1px solid var(--mc-border);">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-semibold" style="font-size:0.8rem;">@msg.Absender</span>
+                                <span class="text-muted" style="font-size:0.72rem;">@msg.ErstelltAm.ToString("dd.MM.yyyy HH:mm")</span>
+                            </div>
+                            <div style="font-size:0.82rem; color:var(--mc-text);">@msg.Text</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,148 @@
+@model ObjektListViewModel
+@{
+    ViewData["Title"] = "Objekte";
+    ViewData["Breadcrumb"] = "<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><span>Objekte</span>";
+}
+
+<div class="mc-page-header">
+    <div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-buildings me-2" style="color:var(--mc-blue);font-size:1.3rem;"></i>
+            Objektübersicht
+        </h1>
+        <p class="mc-page-subtitle">Alle Bauträgerprojekte Ihrer Unterbeteiligungsportfolios</p>
+    </div>
+    <div class="mc-badge badge-primary" style="padding:0.4rem 0.9rem; font-size:0.8rem;">
+        <i class="bi bi-buildings me-1"></i> @Model.Objekte.Count Objekte
+    </div>
+</div>
+
+<!-- Filter / Suche -->
+<form method="get" asp-action="Index">
+    <div class="mc-filter-bar">
+        <div style="flex:1; min-width:200px;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                <input type="text"
+                       id="suchfeld"
+                       name="suche"
+                       value="@Model.Suchbegriff"
+                       class="form-control"
+                       placeholder="Objektname, Standort oder Bauträger suchen …" />
+            </div>
+        </div>
+        <select name="status" class="form-select form-select-sm" style="max-width:180px;" onchange="this.form.submit()">
+            @foreach (var opt in Model.StatusOptionen)
+            {
+                <option value="@opt.Wert" selected="@(Model.StatusFilter == opt.Wert)">@opt.Bezeichnung</option>
+            }
+        </select>
+        <select name="sortierung" class="form-select form-select-sm" style="max-width:200px;" onchange="this.form.submit()">
+            @foreach (var opt in Model.SortierOptionen)
+            {
+                <option value="@opt.Wert" selected="@(Model.Sortierung == opt.Wert)">@opt.Bezeichnung</option>
+            }
+        </select>
+        @if (!string.IsNullOrWhiteSpace(Model.Suchbegriff) || !string.IsNullOrWhiteSpace(Model.StatusFilter))
+        {
+            <a asp-action="Index" class="btn-mc-ghost">
+                <i class="bi bi-x-circle"></i> Zurücksetzen
+            </a>
+        }
+    </div>
+</form>
+
+<!-- Tabelle -->
+<div class="mc-card">
+    <div class="mc-card-body" style="padding:0;">
+        <div class="mc-table-wrapper">
+            <table class="mc-table">
+                <thead>
+                    <tr>
+                        <th>Objekt / Bauträger</th>
+                        <th>Standort</th>
+                        <th>Status</th>
+                        <th class="text-end">UB-Quote</th>
+                        <th class="text-end">Metakonto</th>
+                        <th class="text-end">Kaufpreissammelkonto</th>
+                        <th class="text-end">Avale</th>
+                        <th class="text-end">Einheiten</th>
+                        <th class="text-end">Verkauft</th>
+                        <th>Bautenstand</th>
+                        <th>Aktualisiert</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var obj in Model.Objekte)
+                    {
+                        var progressClass = obj.BautenstandProzent >= 80 ? "green"
+                            : obj.BautenstandProzent >= 40 ? ""
+                            : "yellow";
+
+                        <tr>
+                            <td>
+                                <div class="fw-semibold" style="min-width:150px;">@obj.Objektname</div>
+                                <div class="text-muted" style="font-size:0.73rem;">
+                                    <i class="bi bi-building me-1"></i>@obj.Bautraeger
+                                </div>
+                            </td>
+                            <td style="min-width:140px; font-size:0.82rem;">
+                                <i class="bi bi-geo-alt text-muted me-1"></i>@obj.Standort
+                            </td>
+                            <td>
+                                <span class="mc-badge @obj.StatusCssClass">@obj.Status</span>
+                            </td>
+                            <td class="text-end fw-semibold text-currency">
+                                @obj.Unterbeteiligungsquote.ToString("N2") %
+                            </td>
+                            <td class="text-end text-currency" style="font-size:0.83rem;">
+                                @obj.Metakontosaldo.ToString("N0") €
+                            </td>
+                            <td class="text-end text-currency" style="font-size:0.83rem;">
+                                @obj.Kaufpreissammelkontosaldo.ToString("N0") €
+                            </td>
+                            <td class="text-end text-currency" style="font-size:0.83rem;">
+                                @obj.Avale.ToString("N0") €
+                            </td>
+                            <td class="text-end">@obj.EinheitenGesamt</td>
+                            <td class="text-end">
+                                @obj.EinheitenVerkauft
+                                <div class="text-muted" style="font-size:0.72rem;">@obj.Verkaufsquote.ToString("N1") %</div>
+                            </td>
+                            <td style="min-width:110px;">
+                                <div class="mc-progress-label">
+                                    <span></span>
+                                    <span>@obj.BautenstandProzent.ToString("N0") %</span>
+                                </div>
+                                <div class="mc-progress">
+                                    <div class="mc-progress-bar @progressClass"
+                                         data-width="@obj.BautenstandProzent"
+                                         style="width:0%"></div>
+                                </div>
+                            </td>
+                            <td style="font-size:0.78rem; white-space:nowrap; color:var(--mc-text-muted);">
+                                @obj.LetzteAktualisierung.ToString("dd.MM.yyyy")
+                            </td>
+                            <td>
+                                <a asp-controller="Objekte" asp-action="Details" asp-route-id="@obj.Id"
+                                   class="btn-mc-primary" style="font-size:0.78rem; padding:0.35rem 0.8rem;">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Objekte.Any())
+                    {
+                        <tr>
+                            <td colspan="12" class="text-center py-5 text-muted">
+                                <i class="bi bi-search fs-2 d-block mb-2"></i>
+                                Keine Objekte gefunden – Filter anpassen?
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

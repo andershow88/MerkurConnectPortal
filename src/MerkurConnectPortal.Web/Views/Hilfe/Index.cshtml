@@ -1,0 +1,178 @@
+@{
+    ViewData["Title"] = "Hilfe & Kontakt";
+    ViewData["Breadcrumb"] = "<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><span>Hilfe & Kontakt</span>";
+}
+
+<div class="mc-page-header">
+    <div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-question-circle me-2" style="color:var(--mc-blue);font-size:1.3rem;"></i>
+            Hilfe & Kontakt
+        </h1>
+        <p class="mc-page-subtitle">Unterstützung für das MerkurConnect Partnerportal</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Kontaktinformationen -->
+    <div class="col-lg-6">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-telephone-fill"></i> Ihr Ansprechpartner</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="mc-contact-card">
+                    <div class="mc-contact-icon"><i class="bi bi-person-lines-fill"></i></div>
+                    <div>
+                        <div class="fw-bold" style="color:var(--mc-navy);">Merkur Privatbank KGaA</div>
+                        <div class="text-muted small">Abteilung Bauträgerfinanzierung / Unterbeteiligungen</div>
+                        <div class="mt-2">
+                            <div class="mb-1"><i class="bi bi-telephone text-primary me-2"></i>+49 (0)89 455 890-0</div>
+                            <div class="mb-1"><i class="bi bi-envelope text-primary me-2"></i>unterbeteiligung@merkur-privatbank.de</div>
+                            <div><i class="bi bi-clock text-primary me-2"></i>Mo–Fr 8:00–17:00 Uhr</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mc-contact-card">
+                    <div class="mc-contact-icon" style="background:#f0fdf4;color:#16a34a;"><i class="bi bi-headset"></i></div>
+                    <div>
+                        <div class="fw-bold" style="color:var(--mc-navy);">Technischer Support</div>
+                        <div class="text-muted small">Bei Fragen zur Portalnutzung</div>
+                        <div class="mt-2">
+                            <div class="mb-1"><i class="bi bi-envelope text-primary me-2"></i>portal-support@merkur-privatbank.de</div>
+                            <div><i class="bi bi-clock text-primary me-2"></i>Mo–Fr 8:00–18:00 Uhr</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="col-lg-6">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-patch-question-fill"></i> Häufige Fragen</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="accordion accordion-flush" id="faqAccordion">
+                    <div class="accordion-item border-bottom">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed py-2 px-0"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faq1"
+                                    style="font-size:0.85rem; font-weight:600; background:none; color:var(--mc-text);">
+                                Wie oft werden die Daten aktualisiert?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse">
+                            <div class="accordion-body px-0 pt-0 pb-2 text-muted" style="font-size:0.82rem;">
+                                Die Kerndaten (Metakonto, Bautenstand, Einheiten) werden quartalsweise
+                                oder nach wesentlichen Ereignissen aktualisiert. Das genaue Datum
+                                der letzten Aktualisierung finden Sie in der Objektdetailansicht.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-bottom">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed py-2 px-0"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faq2"
+                                    style="font-size:0.85rem; font-weight:600; background:none; color:var(--mc-text);">
+                                Welche Dokumente kann ich hochladen?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse">
+                            <div class="accordion-body px-0 pt-0 pb-2 text-muted" style="font-size:0.82rem;">
+                                Sie können PDF, Word, Excel sowie gängige Bilddateien hochladen.
+                                Die maximale Dateigröße beträgt 50 MB. Bitte stellen Sie sicher,
+                                dass Sie zur Weitergabe der Dokumente berechtigt sind.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-bottom">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed py-2 px-0"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faq3"
+                                    style="font-size:0.85rem; font-weight:600; background:none; color:var(--mc-text);">
+                                Warum sehe ich nur bestimmte Objekte?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse">
+                            <div class="accordion-body px-0 pt-0 pb-2 text-muted" style="font-size:0.82rem;">
+                                Das Portal zeigt ausschließlich die Projekte, an denen Ihre
+                                Partnerbank unterbeteiligt ist. Daten anderer Unterbeteiligungspartner
+                                sind für Sie nicht sichtbar.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed py-2 px-0"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faq4"
+                                    style="font-size:0.85rem; font-weight:600; background:none; color:var(--mc-text);">
+                                Was bedeuten die verschiedenen Statusanzeigen?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse">
+                            <div class="accordion-body px-0 pt-0 pb-2 text-muted" style="font-size:0.82rem;">
+                                <div class="d-flex flex-column gap-1">
+                                    <div><span class="mc-badge badge-warning me-2">In Planung</span> Genehmigungsphase, noch kein Baubeginn</div>
+                                    <div><span class="mc-badge badge-primary me-2">In Bau</span> Aktive Bauphase</div>
+                                    <div><span class="mc-badge badge-success me-2">Fertiggestellt</span> Bauabnahme erfolgt, Übergaben laufen</div>
+                                    <div><span class="mc-badge badge-secondary me-2">Abgeschlossen</span> Vollständig abgewickelt</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portalinformationen -->
+    <div class="col-12">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-info-circle-fill"></i> Über das Portal</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded" style="background:#f7f9fc; border:1px solid var(--mc-border);">
+                            <div class="fw-bold mb-1" style="font-size:0.85rem; color:var(--mc-navy);">
+                                <i class="bi bi-rocket-takeoff text-primary me-1"></i> MVP – Version 1.0
+                            </div>
+                            <div class="text-muted" style="font-size:0.78rem;">
+                                Dies ist die erste Version des MerkurConnect Portals.
+                                Weitere Funktionen wie echte Systemanbindungen und erweiterte
+                                Sicherheitsfeatures sind in Planung.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+                            <div class="fw-bold mb-1" style="font-size:0.85rem; color:#15803d;">
+                                <i class="bi bi-shield-check me-1"></i> Datenschutz
+                            </div>
+                            <div class="text-muted" style="font-size:0.78rem;">
+                                Alle Daten werden ausschließlich auf Servern der Merkur Privatbank KGaA
+                                innerhalb Deutschlands verarbeitet. Zugang nur für autorisierte Nutzer.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded" style="background:#fffbeb; border:1px solid #fde68a;">
+                            <div class="fw-bold mb-1" style="font-size:0.85rem; color:#b45309;">
+                                <i class="bi bi-exclamation-triangle me-1"></i> Demo-Umgebung
+                            </div>
+                            <div class="text-muted" style="font-size:0.78rem;">
+                                Diese Instanz enthält Demo-Daten zu Testzwecken.
+                                Produktive Daten werden nach finaler Freigabe und Systemanbindung integriert.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

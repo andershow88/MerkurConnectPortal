@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MerkurConnectPortal.Web</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MerkurConnectPortal.Application\MerkurConnectPortal.Application.csproj" />
+    <ProjectReference Include="..\MerkurConnectPortal.Infrastructure\MerkurConnectPortal.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

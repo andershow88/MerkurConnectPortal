@@ -1,0 +1,122 @@
+@model NachrichtViewModel
+@{
+    ViewData["Title"] = $"Kommunikation – {Model.ObjektName}";
+    ViewData["Breadcrumb"] = $"<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><a href='/Objekte'>Objekte</a><span class='separator'>/</span><a href='/Objekte/Details/{Model.ObjektId}'>{Model.ObjektName}</a><span class='separator'>/</span><span>Kommunikation</span>";
+    var anzeigename = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? "";
+    var bankname = User.FindFirst("PartnerBankName")?.Value ?? "";
+}
+
+<div class="mc-page-header">
+    <div>
+        <div class="mb-1">
+            <a asp-controller="Objekte" asp-action="Details" asp-route-id="@Model.ObjektId"
+               class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                <i class="bi bi-arrow-left"></i> Zurück zum Objekt
+            </a>
+        </div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-chat-dots me-2" style="color:var(--mc-blue);font-size:1.3rem;"></i>
+            Kommunikation
+        </h1>
+        <p class="mc-page-subtitle">@Model.ObjektName</p>
+    </div>
+    <div class="mc-badge badge-secondary" style="padding:0.4rem 0.9rem; font-size:0.8rem;">
+        <i class="bi bi-info-circle me-1"></i> Objektbezogene Kommunikation (MVP)
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <!-- Nachrichtenverlauf -->
+        <div class="mc-card" style="height:calc(100% - 0px);">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-chat-text"></i> Nachrichtenverlauf</h2>
+                <span class="text-muted small">@Model.Nachrichten.Count Nachricht(en)</span>
+            </div>
+            <div class="mc-card-body">
+                @if (!Model.Nachrichten.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-chat-square fs-2 d-block mb-2"></i>
+                        Noch keine Nachrichten vorhanden.<br />
+                        <span class="small">Schreiben Sie die erste Nachricht zu diesem Objekt.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="mc-message-list">
+                        @foreach (var msg in Model.Nachrichten)
+                        {
+                            var vonBank = msg.Absender.Contains("Merkur", StringComparison.OrdinalIgnoreCase);
+                            var cssClass = vonBank ? "from-bank" : "from-me";
+
+                            <div class="mc-message @cssClass">
+                                <div class="mc-message-bubble">@msg.Text</div>
+                                <div class="mc-message-meta">
+                                    <strong>@msg.Absender</strong> · @msg.ErstelltAm.ToString("dd.MM.yyyy HH:mm") Uhr
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Neue Nachricht -->
+        <div class="mc-card mb-3">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-pencil-square"></i> Neue Nachricht</h2>
+            </div>
+            <div class="mc-card-body">
+                <form asp-action="Senden" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ObjektId" />
+                    <input type="hidden" asp-for="ObjektName" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3" style="font-size:0.83rem;"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Von</label>
+                        <div class="form-control bg-light" style="font-size:0.85rem; color:var(--mc-text-muted);">
+                            <i class="bi bi-person-circle me-1"></i>
+                            @anzeigename (@bankname)
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NeueNachricht" class="form-label fw-semibold small"></label>
+                        <textarea asp-for="NeueNachricht"
+                                  class="form-control"
+                                  rows="5"
+                                  placeholder="Ihre Nachricht an die Merkur Bank …"
+                                  style="font-size:0.85rem; resize:vertical;"></textarea>
+                        <span asp-validation-for="NeueNachricht" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn-mc-primary w-100">
+                        <i class="bi bi-send-fill me-1"></i> Nachricht senden
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Hinweis -->
+        <div class="mc-card">
+            <div class="mc-card-body-sm">
+                <div class="text-muted" style="font-size:0.78rem;">
+                    <i class="bi bi-info-circle me-1 text-primary"></i>
+                    <strong>Kommunikation im MVP</strong><br />
+                    Nachrichten werden direkt mit Bezug auf dieses Objekt gespeichert.
+                    In einer späteren Ausbaustufe ist eine E-Mail-Benachrichtigung
+                    und ein vollständiger Nachrichtenkanal geplant.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

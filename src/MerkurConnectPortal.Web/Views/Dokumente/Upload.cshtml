@@ -1,0 +1,94 @@
+@model DokumentUploadViewModel
+@{
+    ViewData["Title"] = "Dokument hochladen";
+    ViewData["Breadcrumb"] = $"<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><a href='/Objekte'>Objekte</a><span class='separator'>/</span><a href='/Objekte/Details/{Model.ObjektId}'>{Model.ObjektName}</a><span class='separator'>/</span><a href='/Dokumente/Objekt/{Model.ObjektId}'>Dokumente</a><span class='separator'>/</span><span>Hochladen</span>";
+}
+
+<div class="mc-page-header">
+    <div>
+        <div class="mb-1">
+            <a asp-controller="Dokumente" asp-action="Objekt" asp-route-objektId="@Model.ObjektId"
+               class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                <i class="bi bi-arrow-left"></i> Zurück
+            </a>
+        </div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-upload me-2" style="color:var(--mc-blue);font-size:1.3rem;"></i>
+            Dokument hochladen
+        </h1>
+        <p class="mc-page-subtitle">@Model.ObjektName</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-file-earmark-plus"></i> Dokument auswählen</h2>
+            </div>
+            <div class="mc-card-body">
+                <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ObjektId" />
+                    <input type="hidden" asp-for="ObjektName" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3" style="font-size:0.83rem;"></div>
+
+                    <!-- Datei-Upload Bereich -->
+                    <div class="mb-4">
+                        <label asp-for="Datei" class="form-label fw-semibold"></label>
+                        <div class="border-2 border-dashed rounded p-4 text-center"
+                             style="border:2px dashed var(--mc-border); border-radius:var(--mc-radius); cursor:pointer;"
+                             onclick="document.getElementById('dateiInput').click()">
+                            <i class="bi bi-cloud-upload fs-1 text-muted d-block mb-2"></i>
+                            <div class="fw-semibold text-muted mb-1">Datei auswählen oder hierher ziehen</div>
+                            <div class="text-muted small mb-2">PDF, Word, Excel · Max. 50 MB</div>
+                            <span id="dateiLabel" class="mc-badge badge-secondary">Keine Datei ausgewählt</span>
+                        </div>
+                        <input type="file"
+                               id="dateiInput"
+                               asp-for="Datei"
+                               class="d-none"
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt" />
+                        <span asp-validation-for="Datei" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Kategorie -->
+                    <div class="mb-4">
+                        <label asp-for="Kategorie" class="form-label fw-semibold"></label>
+                        <select asp-for="Kategorie" class="form-select">
+                            @foreach (var opt in Model.KategorieOptionen)
+                            {
+                                <option value="@opt.Wert">@opt.Bezeichnung</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Kategorie" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Hinweise -->
+                    <div class="alert alert-light border" style="font-size:0.8rem; border-color:var(--mc-border)!important;">
+                        <i class="bi bi-info-circle text-primary me-1"></i>
+                        <strong>Hinweis:</strong> Hochgeladene Dokumente sind für alle Benutzer
+                        Ihrer Partnerbank sichtbar. Bitte stellen Sie sicher, dass Sie zur
+                        Weitergabe des Dokuments berechtigt sind.
+                    </div>
+
+                    <!-- Aktionen -->
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a asp-controller="Dokumente" asp-action="Objekt" asp-route-objektId="@Model.ObjektId"
+                           class="btn-mc-ghost">
+                            Abbrechen
+                        </a>
+                        <button type="submit" class="btn-mc-primary">
+                            <i class="bi bi-upload"></i> Hochladen
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
