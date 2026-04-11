@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 122" fill="#7a7a7a">
+  <!-- MERKUR -->
+  <text x="0" y="58" font-family="'Arial Black','Arial',sans-serif" font-weight="900" font-size="56" letter-spacing="1" fill="#7a7a7a">MERKUR</text>
+  <!-- PRIVATBANK -->
+  <text x="2" y="102" font-family="'Arial',sans-serif" font-weight="400" font-size="37" letter-spacing="5" fill="#7a7a7a">PRIVATBANK</text>
+
+  <!-- Hermes Symbol -->
+  <!-- Head -->
+  <circle cx="456" cy="13" r="10"/>
+  <!-- Left wing (parallelogram) -->
+  <polygon points="413,25 441,19 439,31 411,37"/>
+  <!-- Right wing (parallelogram) -->
+  <polygon points="499,25 471,19 473,31 501,37"/>
+  <!-- Staff / vertical rod -->
+  <rect x="452" y="23" width="7" height="94"/>
+  <!-- Left horizontal arm -->
+  <rect x="412" y="52" width="40" height="6"/>
+  <!-- Right horizontal arm -->
+  <rect x="455" y="52" width="40" height="6"/>
+  <!-- Left scale pan (open triangle) -->
+  <polyline points="413,58 397,114 431,114 413,58" fill="none" stroke="#7a7a7a" stroke-width="4.5" stroke-linejoin="round"/>
+  <!-- Right scale pan (open triangle) -->
+  <polyline points="495,58 479,114 513,114 495,58" fill="none" stroke="#7a7a7a" stroke-width="4.5" stroke-linejoin="round"/>
+</svg>
