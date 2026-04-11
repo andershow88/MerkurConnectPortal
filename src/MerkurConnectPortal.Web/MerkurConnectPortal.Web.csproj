@@ -9,4 +9,7 @@
     <ProjectReference Include="..\MerkurConnectPortal.Application\MerkurConnectPortal.Application.csproj" />
     <ProjectReference Include="..\MerkurConnectPortal.Infrastructure\MerkurConnectPortal.Infrastructure.csproj" />
   </ItemGroup>
+  <Target Name="EnsureStaticWebAssetsIntermediateDirectory" BeforeTargets="GenerateStaticWebAssetEndpointsPropsFile">
+    <MakeDir Directories="$(IntermediateOutputPath)staticwebassets" />
+  </Target>
 </Project>
