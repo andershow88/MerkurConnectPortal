@@ -1,6 +1,34 @@
 // MerkurConnect Portal – Client-seitige Hilfsfunktionen
 
+// --- Dark Mode (wird sofort ausgeführt, vor DOMContentLoaded) ---
+(function () {
+    var saved = localStorage.getItem('mc-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+})();
+
+function mcApplyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('mc-theme', theme);
+    var icon = document.getElementById('themeIcon');
+    if (icon) {
+        icon.className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Theme Toggle ---
+    var themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        // Icon beim Laden korrekt setzen
+        var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        mcApplyTheme(currentTheme);
+
+        themeToggle.addEventListener('click', function () {
+            var current = document.documentElement.getAttribute('data-theme') || 'light';
+            mcApplyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+    }
 
     // --- Sidebar Toggle (Mobile) ---
     const toggleBtn = document.getElementById('sidebarToggle');
