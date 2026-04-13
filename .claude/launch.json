@@ -1,0 +1,43 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "MerkurConnectPortal (HTTP)",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "src/MerkurConnectPortal.Web/MerkurConnectPortal.Web.csproj",
+        "--urls",
+        "http://localhost:5000"
+      ],
+      "port": 5000
+    },
+    {
+      "name": "MerkurConnectPortal (HTTPS)",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "src/MerkurConnectPortal.Web/MerkurConnectPortal.Web.csproj",
+        "--urls",
+        "https://localhost:5001"
+      ],
+      "port": 5001
+    },
+    {
+      "name": "MerkurConnectPortal (Docker)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": [
+        "run",
+        "--rm",
+        "-p",
+        "8080:8080",
+        "--name",
+        "merkurconnect",
+        "merkurconnect:dev"
+      ],
+      "port": 8080
+    }
+  ]
+}
