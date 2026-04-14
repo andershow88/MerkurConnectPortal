@@ -36,4 +36,29 @@ public class DashboardController : BaseController
         var dokumente = await _dokumentService.GetUngeleseneAnzahlForPartnerBankAsync(partnerBankId);
         return Json(new { anzahl = nachrichten + dokumente });
     }
+
+    // ── Aktivitäten-Übersicht ─────────────────────────────────────────────────
+
+    public async Task<IActionResult> Aktivitaeten()
+    {
+        var partnerBankId = GetPartnerBankId();
+        var aktivitaeten = await _dashboardService.GetUngeleseneAktivitaetenAsync(partnerBankId);
+        var ungelesen = aktivitaeten.Count(a => !a.Gelesen);
+
+        ViewData["Breadcrumb"] = "<a href='/Dashboard'>Dashboard</a><span class='separator'>/</span><span>Aktivitäten</span>";
+        return View(new AktivitaetenViewModel
+        {
+            Aktivitaeten = aktivitaeten,
+            UngeleseneAnzahl = ungelesen
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AlleGelesenMarkieren()
+    {
+        await _dashboardService.MarkiereAlleGelesenAsync(GetPartnerBankId());
+        TempData["Erfolgsmeldung"] = "Alle Aktivitäten wurden als gelesen markiert.";
+        return RedirectToAction("Aktivitaeten");
+    }
 }
