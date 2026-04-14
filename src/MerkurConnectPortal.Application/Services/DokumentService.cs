@@ -19,6 +19,14 @@ public class DokumentService : IDokumentService
             .OrderByDescending(d => d.HochgeladenAm)
             .ToListAsync();
 
+        // Ungelesene Admin-Dokumente dieses Objekts für Partnerbank als gelesen markieren
+        var ungelesen = dokumente.Where(d => !d.VonPartnerBank && !d.PartnerBankGelesen).ToList();
+        if (ungelesen.Any())
+        {
+            ungelesen.ForEach(d => d.PartnerBankGelesen = true);
+            await _db.SaveChangesAsync();
+        }
+
         return dokumente.Select(ToDto).ToList();
     }
 
@@ -32,6 +40,15 @@ public class DokumentService : IDokumentService
             query = query.Where(d => d.Kategorie == kat);
 
         var dokumente = await query.OrderByDescending(d => d.HochgeladenAm).ToListAsync();
+
+        // Alle ungelesenen Admin-Dokumente als gelesen markieren, wenn Gesamtliste geöffnet wird
+        var ungelesen = dokumente.Where(d => !d.VonPartnerBank && !d.PartnerBankGelesen).ToList();
+        if (ungelesen.Any())
+        {
+            ungelesen.ForEach(d => d.PartnerBankGelesen = true);
+            await _db.SaveChangesAsync();
+        }
+
         return dokumente.Select(ToDto).ToList();
     }
 
@@ -82,7 +99,10 @@ public class DokumentService : IDokumentService
             Dateipfad = eindeutigerName,
             DateigroesseBytes = groesse,
             VonPartnerBank = vonPartnerBank,
-            AdminGelesen = !vonPartnerBank
+            // Wenn Partnerbank lädt hoch: Admin hat nicht gelesen, Partnerbank hat selbst gelesen
+            // Wenn Admin lädt hoch: Admin hat gelesen, Partnerbank hat nicht gelesen
+            AdminGelesen = !vonPartnerBank,
+            PartnerBankGelesen = vonPartnerBank
         };
 
         _db.Dokumente.Add(dokument);
@@ -97,6 +117,15 @@ public class DokumentService : IDokumentService
     {
         var dto = await GetDokumentAsync(dokumentId, partnerBankId);
         return dto is null ? null : null;
+    }
+
+    public async Task<int> GetUngeleseneAnzahlForPartnerBankAsync(int partnerBankId)
+    {
+        return await _db.Dokumente
+            .Where(d => !d.VonPartnerBank
+                     && !d.PartnerBankGelesen
+                     && d.Objekt.PartnerBankId == partnerBankId)
+            .CountAsync();
     }
 
     public static DokumentDto ToDto(Dokument d) => new()

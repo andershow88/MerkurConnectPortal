@@ -14,4 +14,7 @@ public class Nachricht
 
     /// <summary>true = Admin hat diese Nachricht bereits gesehen.</summary>
     public bool AdminGelesen { get; set; }
+
+    /// <summary>true = Partnerbank hat diese Nachricht bereits gesehen.</summary>
+    public bool PartnerBankGelesen { get; set; }
 }

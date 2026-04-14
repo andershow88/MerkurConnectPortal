@@ -17,4 +17,5 @@ public interface IDokumentService
         string uploadVerzeichnis,
         bool vonPartnerBank = true);
     Task<(Stream stream, string dateiname, string contentType)?> DownloadDokumentAsync(int dokumentId, int partnerBankId);
+    Task<int> GetUngeleseneAnzahlForPartnerBankAsync(int partnerBankId);
 }

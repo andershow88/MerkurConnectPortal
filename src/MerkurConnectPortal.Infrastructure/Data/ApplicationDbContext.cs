@@ -57,6 +57,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             e.Property(d => d.Dateipfad).HasMaxLength(1000);
             e.Property(d => d.VonPartnerBank).HasDefaultValue(false);
             e.Property(d => d.AdminGelesen).HasDefaultValue(false);
+            e.Property(d => d.PartnerBankGelesen).HasDefaultValue(false);
             e.HasOne(d => d.Objekt).WithMany(o => o.Dokumente).HasForeignKey(d => d.ObjektId);
         });
 
@@ -67,6 +68,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             e.Property(n => n.Text).HasMaxLength(4000);
             e.Property(n => n.VonPartnerBank).HasDefaultValue(false);
             e.Property(n => n.AdminGelesen).HasDefaultValue(false);
+            e.Property(n => n.PartnerBankGelesen).HasDefaultValue(false);
             e.HasOne(n => n.Objekt).WithMany(o => o.Nachrichten).HasForeignKey(n => n.ObjektId);
         });
 

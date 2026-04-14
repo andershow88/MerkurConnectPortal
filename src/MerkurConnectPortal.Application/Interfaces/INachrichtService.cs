@@ -6,4 +6,5 @@ public interface INachrichtService
 {
     Task<List<NachrichtDto>> GetNachrichtenByObjektAsync(int objektId, int partnerBankId);
     Task<NachrichtDto> SendeNachrichtAsync(int objektId, int partnerBankId, string absender, string text, bool vonPartnerBank = true);
+    Task<int> GetUngeleseneAnzahlForPartnerBankAsync(int partnerBankId);
 }

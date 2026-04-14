@@ -186,6 +186,15 @@ public class AdminController : Controller
         return File(stream, GetContentType(dokument.Dateiname), dokument.Dateiname);
     }
 
+    // ── Polling-Endpunkt ───────────────────────────────────────────────────────
+
+    [HttpGet]
+    public async Task<IActionResult> UngeleseneAnzahlJson()
+    {
+        var anzahl = await _adminService.GetUngeleseneAnzahlAsync();
+        return Json(new { anzahl });
+    }
+
     // ── Aktivitäten ────────────────────────────────────────────────────────────
 
     public async Task<IActionResult> Aktivitaeten()

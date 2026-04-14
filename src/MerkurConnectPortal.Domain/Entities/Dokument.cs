@@ -18,4 +18,7 @@ public class Dokument
 
     /// <summary>true = Admin hat dieses Dokument bereits gesehen.</summary>
     public bool AdminGelesen { get; set; }
+
+    /// <summary>true = Partnerbank hat dieses Dokument bereits gesehen.</summary>
+    public bool PartnerBankGelesen { get; set; }
 }

@@ -19,6 +19,14 @@ public class NachrichtService : INachrichtService
             .OrderBy(n => n.ErstelltAm)
             .ToListAsync();
 
+        // Ungelesene Admin-Nachrichten dieser Unterhaltung für Partnerbank als gelesen markieren
+        var ungelesen = nachrichten.Where(n => !n.VonPartnerBank && !n.PartnerBankGelesen).ToList();
+        if (ungelesen.Any())
+        {
+            ungelesen.ForEach(n => n.PartnerBankGelesen = true);
+            await _db.SaveChangesAsync();
+        }
+
         return nachrichten.Select(ToDto).ToList();
     }
 
@@ -36,7 +44,10 @@ public class NachrichtService : INachrichtService
             Text = text,
             ErstelltAm = DateTime.UtcNow,
             VonPartnerBank = vonPartnerBank,
-            AdminGelesen = !vonPartnerBank // Admin-eigene Nachrichten gelten als bereits gelesen
+            // Wenn Partnerbank sendet: Admin hat nicht gelesen, Partnerbank hat selbst gelesen
+            // Wenn Admin sendet: Admin hat gelesen, Partnerbank hat nicht gelesen
+            AdminGelesen = !vonPartnerBank,
+            PartnerBankGelesen = vonPartnerBank
         };
 
         _db.Nachrichten.Add(nachricht);
@@ -52,6 +63,15 @@ public class NachrichtService : INachrichtService
             ErstelltAm = nachricht.ErstelltAm,
             VonPartnerBank = nachricht.VonPartnerBank
         };
+    }
+
+    public async Task<int> GetUngeleseneAnzahlForPartnerBankAsync(int partnerBankId)
+    {
+        return await _db.Nachrichten
+            .Where(n => !n.VonPartnerBank
+                     && !n.PartnerBankGelesen
+                     && n.Objekt.PartnerBankId == partnerBankId)
+            .CountAsync();
     }
 
     private static NachrichtDto ToDto(Nachricht n) => new()
