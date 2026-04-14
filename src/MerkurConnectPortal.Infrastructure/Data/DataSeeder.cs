@@ -200,88 +200,121 @@ public static class DataSeeder
                 Objekt = objekte1[0],
                 Dateiname = "Quartalsbericht_Q1_2026_WohnparkNord.pdf",
                 Kategorie = DokumentKategorie.Reportings,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2026, 4, 3),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_report_q1_wohnpark.pdf",
-                DateigroesseBytes = 1_248_576
+                DateigroesseBytes = 1_248_576,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Dokument
             {
                 Objekt = objekte1[0],
                 Dateiname = "Unterbeteiligungsvertrag_WohnparkNord.pdf",
                 Kategorie = DokumentKategorie.Vertragsdokumente,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2025, 6, 15),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_vertrag_wohnpark.pdf",
-                DateigroesseBytes = 3_245_824
+                DateigroesseBytes = 3_245_824,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Dokument
             {
                 Objekt = objekte1[1],
                 Dateiname = "Bauzeitenplan_QuartierSued_v3.xlsx",
                 Kategorie = DokumentKategorie.Objektunterlagen,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2026, 3, 10),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_bau_quartiersued.xlsx",
-                DateigroesseBytes = 284_512
+                DateigroesseBytes = 284_512,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Dokument
             {
                 Objekt = objekte1[1],
                 Dateiname = "Quartalsbericht_Q1_2026_QuartierSued.pdf",
                 Kategorie = DokumentKategorie.Reportings,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2026, 4, 4),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_report_q1_quartiersued.pdf",
-                DateigroesseBytes = 987_136
+                DateigroesseBytes = 987_136,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Dokument
             {
                 Objekt = objekte1[2],
                 Dateiname = "Schlussabrechnung_Parkblick.pdf",
                 Kategorie = DokumentKategorie.Auswertungen,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2026, 3, 1),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_schluss_parkblick.pdf",
-                DateigroesseBytes = 2_156_032
+                DateigroesseBytes = 2_156_032,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Dokument
             {
                 Objekt = objekte2[0],
                 Dateiname = "Quartalsbericht_Q1_2026_LindenhofResidences.pdf",
                 Kategorie = DokumentKategorie.Reportings,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2026, 4, 6),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_report_q1_lindenhof.pdf",
-                DateigroesseBytes = 1_456_128
+                DateigroesseBytes = 1_456_128,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Dokument
             {
                 Objekt = objekte2[0],
                 Dateiname = "Unterbeteiligungsvertrag_LindenhofResidences.pdf",
                 Kategorie = DokumentKategorie.Vertragsdokumente,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2025, 3, 22),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_vertrag_lindenhof.pdf",
-                DateigroesseBytes = 4_123_648
+                DateigroesseBytes = 4_123_648,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Dokument
             {
                 Objekt = objekte2[1],
                 Dateiname = "Grundrisse_StadtgartenDortmund.pdf",
                 Kategorie = DokumentKategorie.Objektunterlagen,
-                HochgeladenVon = "Merkur Bank",
+                HochgeladenVon = "Merkur Privatbank",
                 HochgeladenAm = new DateTime(2025, 9, 14),
                 Status = DokumentStatus.Aktiv,
                 Dateipfad = "seed_grundrisse_stadtgarten.pdf",
-                DateigroesseBytes = 8_765_440
+                DateigroesseBytes = 8_765_440,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
+            },
+            // Neue ungelesene Dokumente von Merkur (für Partnerbank-Demo)
+            new Dokument
+            {
+                Objekt = objekte1[0],
+                Dateiname = "Kostenkalkulation_Innenausbau_WohnparkNord.pdf",
+                Kategorie = DokumentKategorie.Auswertungen,
+                HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2026, 4, 12, 9, 30, 0),
+                Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_kalkulation_wohnpark.pdf",
+                DateigroesseBytes = 756_480,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = false
+            },
+            new Dokument
+            {
+                Objekt = objekte2[0],
+                Dateiname = "Bautenstandsbericht_Mai2026_LindenhofResidences.pdf",
+                Kategorie = DokumentKategorie.Reportings,
+                HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2026, 4, 13, 11, 0, 0),
+                Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_baubericht_lindenhof.pdf",
+                DateigroesseBytes = 1_024_000,
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = false
             }
         );
 
@@ -289,45 +322,60 @@ public static class DataSeeder
         db.Nachrichten.AddRange(
             new Nachricht
             {
-                Objekt = objekte1[0],
-                Absender = "Merkur Bank",
+                Objekt = objekte1[0], Absender = "Merkur Privatbank",
                 Text = "Der Rohbau ist planmäßig fertiggestellt. Laut Bautenstandsbericht vom 28.03.2026 beträgt der aktuelle Fortschritt 72 %. Die Innenausbauarbeiten beginnen voraussichtlich ab Mai 2026.",
-                ErstelltAm = new DateTime(2026, 3, 28, 10, 30, 0)
+                ErstelltAm = new DateTime(2026, 3, 28, 10, 30, 0),
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte1[0],
-                Absender = "Volksbank Rheinland eG",
+                Objekt = objekte1[0], Absender = "Volksbank Rheinland eG",
                 Text = "Vielen Dank für die Aktualisierung. Bitte stellen Sie uns den aktualisierten Bauzeitenplan zu.",
-                ErstelltAm = new DateTime(2026, 3, 29, 9, 15, 0)
+                ErstelltAm = new DateTime(2026, 3, 29, 9, 15, 0),
+                VonPartnerBank = true, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte1[0],
-                Absender = "Merkur Bank",
+                Objekt = objekte1[0], Absender = "Merkur Privatbank",
                 Text = "Der aktualisierte Bauzeitenplan wurde in den Dokumentenbereich hochgeladen.",
-                ErstelltAm = new DateTime(2026, 4, 1, 14, 45, 0)
+                ErstelltAm = new DateTime(2026, 4, 1, 14, 45, 0),
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte1[1],
-                Absender = "Merkur Bank",
+                Objekt = objekte1[1], Absender = "Merkur Privatbank",
                 Text = "Die Erdarbeiten für Quartier Süd sind abgeschlossen. Die Gründungsarbeiten verlaufen nach Plan.",
-                ErstelltAm = new DateTime(2026, 3, 15, 11, 0, 0)
+                ErstelltAm = new DateTime(2026, 3, 15, 11, 0, 0),
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte2[0],
-                Absender = "Merkur Bank",
+                Objekt = objekte2[0], Absender = "Merkur Privatbank",
                 Text = "Der aktuelle Bautenstand für Lindenhof Residences liegt bei 45 %. Die Rohbauarbeiten schreiten planmäßig voran. Der Quartalsbericht Q1/2026 steht im Dokumentenbereich bereit.",
-                ErstelltAm = new DateTime(2026, 4, 6, 8, 0, 0)
+                ErstelltAm = new DateTime(2026, 4, 6, 8, 0, 0),
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte2[0],
-                Absender = "Sparkasse Westfalen-Lippe",
+                Objekt = objekte2[0], Absender = "Sparkasse Westfalen-Lippe",
                 Text = "Danke für den Bericht. Wann ist mit dem nächsten Bautenstandsbesuch zu rechnen?",
-                ErstelltAm = new DateTime(2026, 4, 7, 10, 20, 0)
+                ErstelltAm = new DateTime(2026, 4, 7, 10, 20, 0),
+                VonPartnerBank = true, AdminGelesen = true, PartnerBankGelesen = true
+            },
+            // Neue ungelesene Nachrichten von Merkur (für Partnerbank-Demo)
+            new Nachricht
+            {
+                Objekt = objekte1[0], Absender = "Merkur Privatbank",
+                Text = "Die Kostenkalkulation für die Innenausbauarbeiten wurde im Dokumentenbereich hinterlegt. Bitte prüfen Sie die aktualisierte Übersicht.",
+                ErstelltAm = new DateTime(2026, 4, 12, 9, 0, 0),
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = false
+            },
+            new Nachricht
+            {
+                Objekt = objekte2[0], Absender = "Merkur Privatbank",
+                Text = "Der nächste Bautenstandsbesuch ist für den 20.05.2026 geplant. Den aktuellen Bautenstandsbericht finden Sie im Dokumentenbereich.",
+                ErstelltAm = new DateTime(2026, 4, 13, 10, 15, 0),
+                VonPartnerBank = false, AdminGelesen = true, PartnerBankGelesen = false
             }
         );
 

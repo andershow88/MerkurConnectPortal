@@ -19,6 +19,14 @@ public class DokumentService : IDokumentService
             .OrderByDescending(d => d.HochgeladenAm)
             .ToListAsync();
 
+        // Ungelesene Merkur-Dokumente dieses Objekts als gelesen markieren
+        var ungelesen = dokumente.Where(d => !d.VonPartnerBank && !d.PartnerBankGelesen).ToList();
+        if (ungelesen.Any())
+        {
+            ungelesen.ForEach(d => d.PartnerBankGelesen = true);
+            await _db.SaveChangesAsync();
+        }
+
         return dokumente.Select(ToDto).ToList();
     }
 
@@ -29,11 +37,18 @@ public class DokumentService : IDokumentService
             .Where(d => d.Objekt.PartnerBankId == partnerBankId);
 
         if (!string.IsNullOrWhiteSpace(kategorie) && Enum.TryParse<DokumentKategorie>(kategorie, out var kat))
-        {
             query = query.Where(d => d.Kategorie == kat);
-        }
 
         var dokumente = await query.OrderByDescending(d => d.HochgeladenAm).ToListAsync();
+
+        // Alle ungelesenen Merkur-Dokumente als gelesen markieren, wenn Gesamtliste geöffnet wird
+        var ungelesen = dokumente.Where(d => !d.VonPartnerBank && !d.PartnerBankGelesen).ToList();
+        if (ungelesen.Any())
+        {
+            ungelesen.ForEach(d => d.PartnerBankGelesen = true);
+            await _db.SaveChangesAsync();
+        }
+
         return dokumente.Select(ToDto).ToList();
     }
 
@@ -53,9 +68,9 @@ public class DokumentService : IDokumentService
         string dateiname,
         string kategorie,
         string hochgeladenVon,
-        string uploadVerzeichnis)
+        string uploadVerzeichnis,
+        bool vonPartnerBank = true)
     {
-        // Sicherstellen, dass das Objekt zur PartnerBank gehört
         var objekt = await _db.Objekte
             .FirstOrDefaultAsync(o => o.Id == objektId && o.PartnerBankId == partnerBankId)
             ?? throw new InvalidOperationException("Objekt nicht gefunden oder kein Zugriff.");
@@ -82,7 +97,12 @@ public class DokumentService : IDokumentService
             HochgeladenAm = DateTime.UtcNow,
             Status = DokumentStatus.Aktiv,
             Dateipfad = eindeutigerName,
-            DateigroesseBytes = groesse
+            DateigroesseBytes = groesse,
+            VonPartnerBank = vonPartnerBank,
+            // Wenn Partnerbank lädt hoch: Partnerbank hat selbst gelesen, Admin noch nicht
+            // Wenn Admin lädt hoch: Admin hat gelesen, Partnerbank noch nicht
+            AdminGelesen = !vonPartnerBank,
+            PartnerBankGelesen = vonPartnerBank
         };
 
         _db.Dokumente.Add(dokument);
@@ -96,14 +116,19 @@ public class DokumentService : IDokumentService
         int dokumentId, int partnerBankId)
     {
         var dto = await GetDokumentAsync(dokumentId, partnerBankId);
-        if (dto is null) return null;
-
-        // Dateipfad ist relativ gespeichert; die Web-Schicht muss den Basispfad kennen
-        // Hier geben wir nur den Pfad zurück – der Controller löst ihn auf
-        return null;
+        return dto is null ? null : null;
     }
 
-    private static DokumentDto ToDto(Dokument d) => new()
+    public async Task<int> GetUngeleseneAnzahlForPartnerBankAsync(int partnerBankId)
+    {
+        return await _db.Dokumente
+            .Where(d => !d.VonPartnerBank
+                     && !d.PartnerBankGelesen
+                     && d.Objekt.PartnerBankId == partnerBankId)
+            .CountAsync();
+    }
+
+    internal static DokumentDto ToDto(Dokument d) => new()
     {
         Id = d.Id,
         ObjektId = d.ObjektId,

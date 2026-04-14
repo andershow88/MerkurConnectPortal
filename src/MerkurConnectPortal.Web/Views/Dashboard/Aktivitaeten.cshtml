@@ -1,0 +1,105 @@
+@model AktivitaetenViewModel
+@using MerkurConnectPortal.Application.DTOs
+@using MerkurConnectPortal.Web.ViewModels
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Aktivitäten";
+}
+
+<div class="mc-page-header">
+    <div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-bell me-2" style="color:#c0392b;"></i>
+            Aktivitäten
+        </h1>
+        <p class="mc-page-subtitle">
+            Neue Nachrichten und Dokumente von Merkur Privatbank
+            @if (Model.UngeleseneAnzahl > 0)
+            {
+                <span class="ms-2" style="color:#c0392b; font-weight:600;">
+                    (@Model.UngeleseneAnzahl ungelesen)
+                </span>
+            }
+        </p>
+    </div>
+    @if (Model.UngeleseneAnzahl > 0)
+    {
+        <form asp-action="AlleGelesenMarkieren" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-mc-ghost">
+                <i class="bi bi-check2-all me-1"></i> Alle als gelesen markieren
+            </button>
+        </form>
+    }
+</div>
+
+@if (!Model.Aktivitaeten.Any())
+{
+    <div class="mc-card">
+        <div class="mc-card-body text-center py-5 text-muted">
+            <i class="bi bi-bell-slash fs-2 d-block mb-2"></i>
+            Keine neuen Aktivitäten.<br />
+            <span class="small">Alle Nachrichten und Dokumente von Merkur Privatbank wurden bereits gesehen.</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="mc-card">
+        <div class="mc-card-header">
+            <h2 class="mc-card-title">
+                <i class="bi bi-clock-history"></i> @Model.Aktivitaeten.Count Aktivität(en)
+            </h2>
+        </div>
+        <div class="mc-card-body" style="padding:0;">
+            <table class="mc-table">
+                <thead>
+                    <tr>
+                        <th>Typ</th>
+                        <th>Objekt</th>
+                        <th>Von</th>
+                        <th>Vorschau</th>
+                        <th>Datum</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Aktivitaeten)
+                    {
+                        <tr style="@(!item.Gelesen ? "background:rgba(192,57,43,0.04);" : "")">
+                            <td>
+                                <span class="mc-badge @(item.Typ == BenachrichtigungTyp.Nachricht ? "badge-primary" : "badge-secondary")">
+                                    <i class="bi @item.TypIcon me-1"></i>@item.TypBezeichnung
+                                </span>
+                            </td>
+                            <td style="font-size:0.82rem; font-weight:600;">@item.ObjektName</td>
+                            <td style="font-size:0.82rem; color:var(--mc-text-muted);">@item.Absender</td>
+                            <td style="font-size:0.82rem; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                @item.Vorschau
+                            </td>
+                            <td style="font-size:0.8rem; white-space:nowrap;">
+                                @item.ErstelltAm.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+                            <td>
+                                @if (item.Typ == BenachrichtigungTyp.Nachricht)
+                                {
+                                    <a asp-controller="Nachrichten" asp-action="Index" asp-route-objektId="@item.ObjektId"
+                                       class="btn-mc-primary" style="padding:0.25rem 0.65rem; font-size:0.75rem; white-space:nowrap;">
+                                        <i class="bi bi-chat-dots me-1"></i>Öffnen
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Dokumente" asp-action="Download" asp-route-id="@item.Id"
+                                       class="btn-mc-ghost" style="padding:0.25rem 0.65rem; font-size:0.75rem; white-space:nowrap;">
+                                        <i class="bi bi-download me-1"></i>Herunterladen
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

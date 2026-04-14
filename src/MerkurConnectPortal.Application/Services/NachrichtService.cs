@@ -19,18 +19,19 @@ public class NachrichtService : INachrichtService
             .OrderBy(n => n.ErstelltAm)
             .ToListAsync();
 
-        return nachrichten.Select(n => new NachrichtDto
+        // Ungelesene Merkur-Nachrichten dieser Unterhaltung als gelesen markieren
+        var ungelesen = nachrichten.Where(n => !n.VonPartnerBank && !n.PartnerBankGelesen).ToList();
+        if (ungelesen.Any())
         {
-            Id = n.Id,
-            ObjektId = n.ObjektId,
-            ObjektName = n.Objekt?.Objektname ?? string.Empty,
-            Absender = n.Absender,
-            Text = n.Text,
-            ErstelltAm = n.ErstelltAm
-        }).ToList();
+            ungelesen.ForEach(n => n.PartnerBankGelesen = true);
+            await _db.SaveChangesAsync();
+        }
+
+        return nachrichten.Select(ToDto).ToList();
     }
 
-    public async Task<NachrichtDto> SendeNachrichtAsync(int objektId, int partnerBankId, string absender, string text)
+    public async Task<NachrichtDto> SendeNachrichtAsync(
+        int objektId, int partnerBankId, string absender, string text, bool vonPartnerBank = true)
     {
         var objekt = await _db.Objekte
             .FirstOrDefaultAsync(o => o.Id == objektId && o.PartnerBankId == partnerBankId)
@@ -41,7 +42,12 @@ public class NachrichtService : INachrichtService
             ObjektId = objektId,
             Absender = absender,
             Text = text,
-            ErstelltAm = DateTime.UtcNow
+            ErstelltAm = DateTime.UtcNow,
+            VonPartnerBank = vonPartnerBank,
+            // Wenn Partnerbank sendet: Partnerbank hat selbst gelesen, Admin noch nicht
+            // Wenn Admin sendet: Admin hat gelesen, Partnerbank noch nicht
+            AdminGelesen = !vonPartnerBank,
+            PartnerBankGelesen = vonPartnerBank
         };
 
         _db.Nachrichten.Add(nachricht);
@@ -54,7 +60,28 @@ public class NachrichtService : INachrichtService
             ObjektName = objekt.Objektname,
             Absender = absender,
             Text = text,
-            ErstelltAm = nachricht.ErstelltAm
+            ErstelltAm = nachricht.ErstelltAm,
+            VonPartnerBank = nachricht.VonPartnerBank
         };
     }
+
+    public async Task<int> GetUngeleseneAnzahlForPartnerBankAsync(int partnerBankId)
+    {
+        return await _db.Nachrichten
+            .Where(n => !n.VonPartnerBank
+                     && !n.PartnerBankGelesen
+                     && n.Objekt.PartnerBankId == partnerBankId)
+            .CountAsync();
+    }
+
+    private static NachrichtDto ToDto(Nachricht n) => new()
+    {
+        Id = n.Id,
+        ObjektId = n.ObjektId,
+        ObjektName = n.Objekt?.Objektname ?? string.Empty,
+        Absender = n.Absender,
+        Text = n.Text,
+        ErstelltAm = n.ErstelltAm,
+        VonPartnerBank = n.VonPartnerBank
+    };
 }
