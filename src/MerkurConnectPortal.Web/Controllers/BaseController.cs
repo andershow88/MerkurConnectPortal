@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MerkurConnectPortal.Web.Controllers;
 
@@ -18,4 +19,17 @@ public abstract class BaseController : Controller
 
     protected string GetPartnerBankName() =>
         User.FindFirst("PartnerBankName")?.Value ?? string.Empty;
+
+    protected bool IsAdmin => User.IsInRole("Admin");
+
+    // Admin-Benutzer haben im Partnerbank-Bereich nichts zu suchen
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (IsAdmin)
+        {
+            context.Result = RedirectToAction("Index", "Admin");
+            return;
+        }
+        base.OnActionExecuting(context);
+    }
 }

@@ -1,0 +1,140 @@
+@model AdminDokumenteViewModel
+@using MerkurConnectPortal.Web.ViewModels
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = Model.ObjektName is not null ? $"Dokumente – {Model.ObjektName}" : "Alle Dokumente";
+}
+
+<div class="mc-page-header">
+    <div>
+        @if (Model.ObjektId.HasValue)
+        {
+            <div class="mb-1">
+                <a asp-action="ObjektDetail" asp-route-id="@Model.ObjektId"
+                   class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                    <i class="bi bi-arrow-left"></i> Zurück zum Objekt
+                </a>
+            </div>
+        }
+        <h1 class="mc-page-title">
+            <i class="bi bi-folder2-open me-2"></i>
+            @(Model.ObjektName is not null ? $"Dokumente – {Model.ObjektName}" : "Alle Dokumente")
+        </h1>
+        <p class="mc-page-subtitle">Bankübergreifende Dokumentenübersicht</p>
+    </div>
+    @if (Model.ObjektId.HasValue)
+    {
+        <a asp-action="DokumentUpload" asp-route-objektId="@Model.ObjektId" class="btn-mc-primary">
+            <i class="bi bi-upload me-1"></i> Dokument hochladen
+        </a>
+    }
+</div>
+
+@if (!Model.ObjektId.HasValue)
+{
+    <form method="get" asp-action="Dokumente">
+        <div class="mc-filter-bar">
+            <select name="kategorie" class="form-select" style="max-width:220px;" onchange="this.form.submit()">
+                @foreach (var opt in Model.KategorieOptionen)
+                {
+                    if (opt.Value == Model.KategorieFilter)
+                    {
+                        <option value="@opt.Value" selected>@opt.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@opt.Value">@opt.Text</option>
+                    }
+                }
+            </select>
+            @if (!string.IsNullOrWhiteSpace(Model.KategorieFilter))
+            {
+                <a asp-action="Dokumente" class="btn-mc-ghost"><i class="bi bi-x-circle me-1"></i>Zurücksetzen</a>
+            }
+        </div>
+    </form>
+}
+
+<div class="mc-card">
+    <div class="mc-card-header">
+        <h2 class="mc-card-title"><i class="bi bi-files"></i> @Model.Dokumente.Count Dokument(e)</h2>
+    </div>
+    <div class="mc-card-body" style="padding:0;">
+        @if (!Model.Dokumente.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-folder2 fs-2 d-block mb-2"></i>
+                Keine Dokumente vorhanden.
+            </div>
+        }
+        else
+        {
+            <div class="mc-table-wrapper">
+                <table class="mc-table">
+                    <thead>
+                        <tr>
+                            <th>Dateiname</th>
+                            @if (!Model.ObjektId.HasValue)
+                            {
+                                <th>Objekt / Partnerbank</th>
+                            }
+                            <th>Kategorie</th>
+                            <th>Hochgeladen von</th>
+                            <th>Datum</th>
+                            <th>Größe</th>
+                            <th>Herkunft</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dok in Model.Dokumente)
+                        {
+                            var ext = System.IO.Path.GetExtension(dok.Dateiname).ToLowerInvariant();
+                            var iconClass = ext == ".pdf" ? "pdf" : ext is ".xlsx" or ".xls" ? "excel" : ext is ".docx" or ".doc" ? "word" : "other";
+                            var iconBi = ext == ".pdf" ? "bi-filetype-pdf" : ext is ".xlsx" or ".xls" ? "bi-file-earmark-excel" : ext is ".docx" or ".doc" ? "bi-file-earmark-word" : "bi-file-earmark";
+
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="mc-doc-icon @iconClass"><i class="bi @iconBi"></i></div>
+                                        <span class="fw-semibold" style="font-size:0.83rem;">@dok.Dateiname</span>
+                                    </div>
+                                </td>
+                                @if (!Model.ObjektId.HasValue)
+                                {
+                                    <td>
+                                        <div style="font-size:0.82rem;">@dok.ObjektName</div>
+                                    </td>
+                                }
+                                <td><span class="mc-badge badge-secondary">@dok.Kategorie</span></td>
+                                <td style="font-size:0.82rem; color:var(--mc-text-muted);">@dok.HochgeladenVon</td>
+                                <td style="font-size:0.8rem; white-space:nowrap;">@dok.HochgeladenAm.ToString("dd.MM.yyyy")</td>
+                                <td style="font-size:0.8rem;">@dok.DateigroesseFormatiert</td>
+                                <td>
+                                    @if (dok.VonPartnerBank)
+                                    {
+                                        <span class="mc-badge" style="background:#fdecea; color:#c0392b; font-size:0.68rem;">
+                                            <i class="bi bi-arrow-up-circle me-1"></i>Partnerbank
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="mc-badge badge-secondary" style="font-size:0.68rem;">
+                                            <i class="bi bi-bank me-1"></i>Merkur
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="DokumentDownload" asp-route-id="@dok.Id"
+                                       class="btn-mc-ghost" style="padding:0.25rem 0.6rem; font-size:0.78rem;">
+                                        <i class="bi bi-download me-1"></i>Herunterladen
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

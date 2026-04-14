@@ -11,6 +11,21 @@ public static class DataSeeder
     {
         await db.Database.EnsureCreatedAsync();
 
+        // Admin-Benutzer sicherstellen (auch bei bereits vorhandener DB)
+        if (!await db.Benutzer.AnyAsync(b => b.IsAdmin))
+        {
+            db.Benutzer.Add(new Benutzer
+            {
+                Benutzername = "admin",
+                PasswortHash = HashPasswort("Admin1234!"),
+                Anzeigename = "Merkur Privatbank",
+                EMail = "admin@merkur-privatbank.de",
+                PartnerBankId = null,
+                IsAdmin = true
+            });
+            await db.SaveChangesAsync();
+        }
+
         if (await db.PartnerBanken.AnyAsync()) return;
 
         // --- Partnerbanken ---
@@ -44,69 +59,45 @@ public static class DataSeeder
             {
                 Objektname = "Wohnpark Nord",
                 Standort = "Hamburg, Langenhorner Chaussee 145",
-                Bautraeger = bt1,
-                PartnerBank = bank1,
+                Bautraeger = bt1, PartnerBank = bank1,
                 Status = ObjektStatus.InBau,
-                Unterbeteiligungsquote = 35.00m,
-                Metakontosaldo = 4_250_000m,
-                Kaufpreissammelkontosaldo = 1_820_000m,
-                Avale = 650_000m,
-                EinheitenGesamt = 48,
-                EinheitenVerkauft = 32,
-                Verkaufsquote = 66.67m,
-                BautenstandProzent = 72m,
-                LetzteAktualisierung = new DateTime(2026, 3, 28)
+                Unterbeteiligungsquote = 35.00m, Metakontosaldo = 4_250_000m,
+                Kaufpreissammelkontosaldo = 1_820_000m, Avale = 650_000m,
+                EinheitenGesamt = 48, EinheitenVerkauft = 32, Verkaufsquote = 66.67m,
+                BautenstandProzent = 72m, LetzteAktualisierung = new DateTime(2026, 3, 28)
             },
             new()
             {
                 Objektname = "Quartier Süd",
                 Standort = "Köln, Deutzer Freiheit 87",
-                Bautraeger = bt2,
-                PartnerBank = bank1,
+                Bautraeger = bt2, PartnerBank = bank1,
                 Status = ObjektStatus.InBau,
-                Unterbeteiligungsquote = 40.00m,
-                Metakontosaldo = 6_100_000m,
-                Kaufpreissammelkontosaldo = 2_340_000m,
-                Avale = 980_000m,
-                EinheitenGesamt = 72,
-                EinheitenVerkauft = 54,
-                Verkaufsquote = 75.00m,
-                BautenstandProzent = 58m,
-                LetzteAktualisierung = new DateTime(2026, 4, 2)
+                Unterbeteiligungsquote = 40.00m, Metakontosaldo = 6_100_000m,
+                Kaufpreissammelkontosaldo = 2_340_000m, Avale = 980_000m,
+                EinheitenGesamt = 72, EinheitenVerkauft = 54, Verkaufsquote = 75.00m,
+                BautenstandProzent = 58m, LetzteAktualisierung = new DateTime(2026, 4, 2)
             },
             new()
             {
                 Objektname = "Parkblick",
                 Standort = "Düsseldorf, Grafenberger Allee 210",
-                Bautraeger = bt2,
-                PartnerBank = bank1,
+                Bautraeger = bt2, PartnerBank = bank1,
                 Status = ObjektStatus.Fertiggestellt,
-                Unterbeteiligungsquote = 25.00m,
-                Metakontosaldo = 2_800_000m,
-                Kaufpreissammelkontosaldo = 2_800_000m,
-                Avale = 0m,
-                EinheitenGesamt = 36,
-                EinheitenVerkauft = 36,
-                Verkaufsquote = 100.00m,
-                BautenstandProzent = 100m,
-                LetzteAktualisierung = new DateTime(2026, 2, 15)
+                Unterbeteiligungsquote = 25.00m, Metakontosaldo = 2_800_000m,
+                Kaufpreissammelkontosaldo = 2_800_000m, Avale = 0m,
+                EinheitenGesamt = 36, EinheitenVerkauft = 36, Verkaufsquote = 100.00m,
+                BautenstandProzent = 100m, LetzteAktualisierung = new DateTime(2026, 2, 15)
             },
             new()
             {
                 Objektname = "Seegärten",
                 Standort = "Hannover, Am Maschsee 12",
-                Bautraeger = bt3,
-                PartnerBank = bank1,
+                Bautraeger = bt3, PartnerBank = bank1,
                 Status = ObjektStatus.InPlanung,
-                Unterbeteiligungsquote = 30.00m,
-                Metakontosaldo = 500_000m,
-                Kaufpreissammelkontosaldo = 0m,
-                Avale = 200_000m,
-                EinheitenGesamt = 60,
-                EinheitenVerkauft = 8,
-                Verkaufsquote = 13.33m,
-                BautenstandProzent = 5m,
-                LetzteAktualisierung = new DateTime(2026, 4, 1)
+                Unterbeteiligungsquote = 30.00m, Metakontosaldo = 500_000m,
+                Kaufpreissammelkontosaldo = 0m, Avale = 200_000m,
+                EinheitenGesamt = 60, EinheitenVerkauft = 8, Verkaufsquote = 13.33m,
+                BautenstandProzent = 5m, LetzteAktualisierung = new DateTime(2026, 4, 1)
             }
         };
 
@@ -117,52 +108,34 @@ public static class DataSeeder
             {
                 Objektname = "Lindenhof Residences",
                 Standort = "Münster, Lindenhof 4-8",
-                Bautraeger = bt4,
-                PartnerBank = bank2,
+                Bautraeger = bt4, PartnerBank = bank2,
                 Status = ObjektStatus.InBau,
-                Unterbeteiligungsquote = 45.00m,
-                Metakontosaldo = 8_400_000m,
-                Kaufpreissammelkontosaldo = 3_100_000m,
-                Avale = 1_200_000m,
-                EinheitenGesamt = 96,
-                EinheitenVerkauft = 71,
-                Verkaufsquote = 73.96m,
-                BautenstandProzent = 45m,
-                LetzteAktualisierung = new DateTime(2026, 4, 5)
+                Unterbeteiligungsquote = 45.00m, Metakontosaldo = 8_400_000m,
+                Kaufpreissammelkontosaldo = 3_100_000m, Avale = 1_200_000m,
+                EinheitenGesamt = 96, EinheitenVerkauft = 71, Verkaufsquote = 73.96m,
+                BautenstandProzent = 45m, LetzteAktualisierung = new DateTime(2026, 4, 5)
             },
             new()
             {
                 Objektname = "Stadtgarten Dortmund",
                 Standort = "Dortmund, Brüderweg 22",
-                Bautraeger = bt3,
-                PartnerBank = bank2,
+                Bautraeger = bt3, PartnerBank = bank2,
                 Status = ObjektStatus.InBau,
-                Unterbeteiligungsquote = 38.50m,
-                Metakontosaldo = 5_650_000m,
-                Kaufpreissammelkontosaldo = 1_980_000m,
-                Avale = 750_000m,
-                EinheitenGesamt = 56,
-                EinheitenVerkauft = 39,
-                Verkaufsquote = 69.64m,
-                BautenstandProzent = 62m,
-                LetzteAktualisierung = new DateTime(2026, 3, 20)
+                Unterbeteiligungsquote = 38.50m, Metakontosaldo = 5_650_000m,
+                Kaufpreissammelkontosaldo = 1_980_000m, Avale = 750_000m,
+                EinheitenGesamt = 56, EinheitenVerkauft = 39, Verkaufsquote = 69.64m,
+                BautenstandProzent = 62m, LetzteAktualisierung = new DateTime(2026, 3, 20)
             },
             new()
             {
                 Objektname = "Residenz am Kanal",
                 Standort = "Dortmund, Hafenpromenade 1",
-                Bautraeger = bt1,
-                PartnerBank = bank2,
+                Bautraeger = bt1, PartnerBank = bank2,
                 Status = ObjektStatus.Abgeschlossen,
-                Unterbeteiligungsquote = 20.00m,
-                Metakontosaldo = 0m,
-                Kaufpreissammelkontosaldo = 0m,
-                Avale = 0m,
-                EinheitenGesamt = 24,
-                EinheitenVerkauft = 24,
-                Verkaufsquote = 100.00m,
-                BautenstandProzent = 100m,
-                LetzteAktualisierung = new DateTime(2025, 11, 30)
+                Unterbeteiligungsquote = 20.00m, Metakontosaldo = 0m,
+                Kaufpreissammelkontosaldo = 0m, Avale = 0m,
+                EinheitenGesamt = 24, EinheitenVerkauft = 24, Verkaufsquote = 100.00m,
+                BautenstandProzent = 100m, LetzteAktualisierung = new DateTime(2025, 11, 30)
             }
         };
 
@@ -170,15 +143,12 @@ public static class DataSeeder
         db.Objekte.AddRange(objekte2);
         await db.SaveChangesAsync();
 
-        // --- Benutzer ---
-        var passwortHash1 = HashPasswort("Demo1234!");
-        var passwortHash2 = HashPasswort("Demo1234!");
-
+        // --- Partnerbank-Benutzer ---
         db.Benutzer.AddRange(
             new Benutzer
             {
                 Benutzername = "volksbank.rheinland",
-                PasswortHash = passwortHash1,
+                PasswortHash = HashPasswort("Demo1234!"),
                 Anzeigename = "Thomas Becker",
                 EMail = "t.becker@volksbank-rheinland.de",
                 PartnerBank = bank1
@@ -186,102 +156,95 @@ public static class DataSeeder
             new Benutzer
             {
                 Benutzername = "sparkasse.wl",
-                PasswortHash = passwortHash2,
+                PasswortHash = HashPasswort("Demo1234!"),
                 Anzeigename = "Sandra Müller",
                 EMail = "s.mueller@sparkasse-wl.de",
                 PartnerBank = bank2
             }
         );
 
-        // --- Dokumente ---
+        // --- Dokumente (VonPartnerBank=false = von Merkur Bank hochgeladen) ---
         db.Dokumente.AddRange(
             new Dokument
             {
-                Objekt = objekte1[0],
-                Dateiname = "Quartalsbericht_Q1_2026_WohnparkNord.pdf",
-                Kategorie = DokumentKategorie.Reportings,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2026, 4, 3),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_report_q1_wohnpark.pdf",
-                DateigroesseBytes = 1_248_576
+                Objekt = objekte1[0], Dateiname = "Quartalsbericht_Q1_2026_WohnparkNord.pdf",
+                Kategorie = DokumentKategorie.Reportings, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2026, 4, 3), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_report_q1_wohnpark.pdf", DateigroesseBytes = 1_248_576,
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Dokument
             {
-                Objekt = objekte1[0],
-                Dateiname = "Unterbeteiligungsvertrag_WohnparkNord.pdf",
-                Kategorie = DokumentKategorie.Vertragsdokumente,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2025, 6, 15),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_vertrag_wohnpark.pdf",
-                DateigroesseBytes = 3_245_824
+                Objekt = objekte1[0], Dateiname = "Unterbeteiligungsvertrag_WohnparkNord.pdf",
+                Kategorie = DokumentKategorie.Vertragsdokumente, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2025, 6, 15), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_vertrag_wohnpark.pdf", DateigroesseBytes = 3_245_824,
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Dokument
             {
-                Objekt = objekte1[1],
-                Dateiname = "Bauzeitenplan_QuartierSued_v3.xlsx",
-                Kategorie = DokumentKategorie.Objektunterlagen,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2026, 3, 10),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_bau_quartiersued.xlsx",
-                DateigroesseBytes = 284_512
+                Objekt = objekte1[1], Dateiname = "Bauzeitenplan_QuartierSued_v3.xlsx",
+                Kategorie = DokumentKategorie.Objektunterlagen, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2026, 3, 10), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_bau_quartiersued.xlsx", DateigroesseBytes = 284_512,
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Dokument
             {
-                Objekt = objekte1[1],
-                Dateiname = "Quartalsbericht_Q1_2026_QuartierSued.pdf",
-                Kategorie = DokumentKategorie.Reportings,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2026, 4, 4),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_report_q1_quartiersued.pdf",
-                DateigroesseBytes = 987_136
+                Objekt = objekte1[1], Dateiname = "Quartalsbericht_Q1_2026_QuartierSued.pdf",
+                Kategorie = DokumentKategorie.Reportings, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2026, 4, 4), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_report_q1_quartiersued.pdf", DateigroesseBytes = 987_136,
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Dokument
             {
-                Objekt = objekte1[2],
-                Dateiname = "Schlussabrechnung_Parkblick.pdf",
-                Kategorie = DokumentKategorie.Auswertungen,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2026, 3, 1),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_schluss_parkblick.pdf",
-                DateigroesseBytes = 2_156_032
+                Objekt = objekte1[2], Dateiname = "Schlussabrechnung_Parkblick.pdf",
+                Kategorie = DokumentKategorie.Auswertungen, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2026, 3, 1), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_schluss_parkblick.pdf", DateigroesseBytes = 2_156_032,
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Dokument
             {
-                Objekt = objekte2[0],
-                Dateiname = "Quartalsbericht_Q1_2026_LindenhofResidences.pdf",
-                Kategorie = DokumentKategorie.Reportings,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2026, 4, 6),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_report_q1_lindenhof.pdf",
-                DateigroesseBytes = 1_456_128
+                Objekt = objekte2[0], Dateiname = "Quartalsbericht_Q1_2026_LindenhofResidences.pdf",
+                Kategorie = DokumentKategorie.Reportings, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2026, 4, 6), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_report_q1_lindenhof.pdf", DateigroesseBytes = 1_456_128,
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Dokument
             {
-                Objekt = objekte2[0],
-                Dateiname = "Unterbeteiligungsvertrag_LindenhofResidences.pdf",
-                Kategorie = DokumentKategorie.Vertragsdokumente,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2025, 3, 22),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_vertrag_lindenhof.pdf",
-                DateigroesseBytes = 4_123_648
+                Objekt = objekte2[0], Dateiname = "Unterbeteiligungsvertrag_LindenhofResidences.pdf",
+                Kategorie = DokumentKategorie.Vertragsdokumente, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2025, 3, 22), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_vertrag_lindenhof.pdf", DateigroesseBytes = 4_123_648,
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Dokument
             {
-                Objekt = objekte2[1],
-                Dateiname = "Grundrisse_StadtgartenDortmund.pdf",
-                Kategorie = DokumentKategorie.Objektunterlagen,
-                HochgeladenVon = "Merkur Bank",
-                HochgeladenAm = new DateTime(2025, 9, 14),
-                Status = DokumentStatus.Aktiv,
-                Dateipfad = "seed_grundrisse_stadtgarten.pdf",
-                DateigroesseBytes = 8_765_440
+                Objekt = objekte2[1], Dateiname = "Grundrisse_StadtgartenDortmund.pdf",
+                Kategorie = DokumentKategorie.Objektunterlagen, HochgeladenVon = "Merkur Privatbank",
+                HochgeladenAm = new DateTime(2025, 9, 14), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_grundrisse_stadtgarten.pdf", DateigroesseBytes = 8_765_440,
+                VonPartnerBank = false, AdminGelesen = true
+            },
+            // Beispiel-Dokumente von Partnerbanken (ungelesen für Admin-Demo)
+            new Dokument
+            {
+                Objekt = objekte1[0], Dateiname = "Rueckfragen_WohnparkNord_VR.pdf",
+                Kategorie = DokumentKategorie.Sonstiges, HochgeladenVon = "Thomas Becker",
+                HochgeladenAm = new DateTime(2026, 4, 8), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_rueckfragen_wohnpark.pdf", DateigroesseBytes = 145_200,
+                VonPartnerBank = true, AdminGelesen = false
+            },
+            new Dokument
+            {
+                Objekt = objekte2[0], Dateiname = "Stellungnahme_Lindenhof_April2026.pdf",
+                Kategorie = DokumentKategorie.Sonstiges, HochgeladenVon = "Sandra Müller",
+                HochgeladenAm = new DateTime(2026, 4, 9), Status = DokumentStatus.Aktiv,
+                Dateipfad = "seed_stellungnahme_lindenhof.pdf", DateigroesseBytes = 98_304,
+                VonPartnerBank = true, AdminGelesen = false
             }
         );
 
@@ -289,45 +252,60 @@ public static class DataSeeder
         db.Nachrichten.AddRange(
             new Nachricht
             {
-                Objekt = objekte1[0],
-                Absender = "Merkur Bank",
+                Objekt = objekte1[0], Absender = "Merkur Privatbank",
                 Text = "Der Rohbau ist planmäßig fertiggestellt. Laut Bautenstandsbericht vom 28.03.2026 beträgt der aktuelle Fortschritt 72 %. Die Innenausbauarbeiten beginnen voraussichtlich ab Mai 2026.",
-                ErstelltAm = new DateTime(2026, 3, 28, 10, 30, 0)
+                ErstelltAm = new DateTime(2026, 3, 28, 10, 30, 0),
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte1[0],
-                Absender = "Volksbank Rheinland eG",
+                Objekt = objekte1[0], Absender = "Volksbank Rheinland eG",
                 Text = "Vielen Dank für die Aktualisierung. Bitte stellen Sie uns den aktualisierten Bauzeitenplan zu.",
-                ErstelltAm = new DateTime(2026, 3, 29, 9, 15, 0)
+                ErstelltAm = new DateTime(2026, 3, 29, 9, 15, 0),
+                VonPartnerBank = true, AdminGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte1[0],
-                Absender = "Merkur Bank",
+                Objekt = objekte1[0], Absender = "Merkur Privatbank",
                 Text = "Der aktualisierte Bauzeitenplan wurde in den Dokumentenbereich hochgeladen.",
-                ErstelltAm = new DateTime(2026, 4, 1, 14, 45, 0)
+                ErstelltAm = new DateTime(2026, 4, 1, 14, 45, 0),
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte1[1],
-                Absender = "Merkur Bank",
+                Objekt = objekte1[1], Absender = "Merkur Privatbank",
                 Text = "Die Erdarbeiten für Quartier Süd sind abgeschlossen. Die Gründungsarbeiten verlaufen nach Plan.",
-                ErstelltAm = new DateTime(2026, 3, 15, 11, 0, 0)
+                ErstelltAm = new DateTime(2026, 3, 15, 11, 0, 0),
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte2[0],
-                Absender = "Merkur Bank",
+                Objekt = objekte2[0], Absender = "Merkur Privatbank",
                 Text = "Der aktuelle Bautenstand für Lindenhof Residences liegt bei 45 %. Die Rohbauarbeiten schreiten planmäßig voran. Der Quartalsbericht Q1/2026 steht im Dokumentenbereich bereit.",
-                ErstelltAm = new DateTime(2026, 4, 6, 8, 0, 0)
+                ErstelltAm = new DateTime(2026, 4, 6, 8, 0, 0),
+                VonPartnerBank = false, AdminGelesen = true
             },
             new Nachricht
             {
-                Objekt = objekte2[0],
-                Absender = "Sparkasse Westfalen-Lippe",
+                Objekt = objekte2[0], Absender = "Sparkasse Westfalen-Lippe",
                 Text = "Danke für den Bericht. Wann ist mit dem nächsten Bautenstandsbesuch zu rechnen?",
-                ErstelltAm = new DateTime(2026, 4, 7, 10, 20, 0)
+                ErstelltAm = new DateTime(2026, 4, 7, 10, 20, 0),
+                VonPartnerBank = true, AdminGelesen = true
+            },
+            // Neue ungelesene Nachrichten von Partnerbanken (für Admin-Demo)
+            new Nachricht
+            {
+                Objekt = objekte1[0], Absender = "Volksbank Rheinland eG",
+                Text = "Wir haben noch offene Fragen zur Abrechnung der Innenausbauarbeiten. Können Sie uns die aktuelle Kostenkalkulation zukommen lassen?",
+                ErstelltAm = new DateTime(2026, 4, 10, 8, 45, 0),
+                VonPartnerBank = true, AdminGelesen = false
+            },
+            new Nachricht
+            {
+                Objekt = objekte2[0], Absender = "Sparkasse Westfalen-Lippe",
+                Text = "Bitte teilen Sie uns das geplante Datum für den nächsten Bautenstandsbericht mit. Wir benötigen die Informationen für unser internes Reporting.",
+                ErstelltAm = new DateTime(2026, 4, 11, 14, 30, 0),
+                VonPartnerBank = true, AdminGelesen = false
             }
         );
 

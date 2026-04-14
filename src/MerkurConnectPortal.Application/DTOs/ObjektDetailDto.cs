@@ -6,6 +6,7 @@ public class ObjektDetailDto
     public string Objektname { get; set; } = string.Empty;
     public string Standort { get; set; } = string.Empty;
     public string Bautraeger { get; set; } = string.Empty;
+    public string PartnerBankName { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public string StatusCssClass { get; set; } = string.Empty;
     public decimal Unterbeteiligungsquote { get; set; }

@@ -1,0 +1,75 @@
+@model AdminDokumentUploadViewModel
+@using MerkurConnectPortal.Web.ViewModels
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dokument hochladen";
+}
+
+<div class="mc-page-header">
+    <div>
+        <div class="mb-1">
+            <a asp-action="Dokumente" asp-route-objektId="@Model.ObjektId"
+               class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                <i class="bi bi-arrow-left"></i> Zurück zu Dokumenten
+            </a>
+        </div>
+        <h1 class="mc-page-title"><i class="bi bi-upload me-2"></i>Dokument hochladen</h1>
+        <p class="mc-page-subtitle">@Model.ObjektName</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-file-earmark-arrow-up"></i> Datei auswählen</h2>
+            </div>
+            <div class="mc-card-body">
+                <form asp-action="DokumentUpload" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ObjektId" value="@Model.ObjektId" />
+                    <input type="hidden" name="ObjektName" value="@Model.ObjektName" />
+
+                    <div asp-validation-summary="All" class="alert alert-danger py-2 mb-3" style="font-size:0.83rem;"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Datei auswählen *</label>
+                        <input type="file" name="Datei" id="dateiInput" class="form-control"
+                               accept=".pdf,.xlsx,.xls,.docx,.doc,.png,.jpg,.jpeg,.txt" />
+                        <div id="dateiLabel" class="mt-1" style="font-size:0.78rem; color:var(--mc-text-muted);"></div>
+                        <div class="mt-1" style="font-size:0.75rem; color:var(--mc-text-muted);">
+                            Erlaubt: PDF, Word, Excel, PNG, JPG, TXT · Max. 50 MB
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Kategorie</label>
+                        <select name="Kategorie" class="form-select">
+                            @foreach (var opt in Model.KategorieOptionen)
+                            {
+                                if (opt.Value == Model.Kategorie)
+                                {
+                                    <option value="@opt.Value" selected>@opt.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@opt.Value">@opt.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="alert alert-info py-2" style="font-size:0.78rem; background:#eaf3fb; border:none; color:#1a5276;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Das Dokument wird für die Partnerbank <strong>@Model.ObjektName</strong> sichtbar und als
+                        <strong>von Merkur Privatbank hochgeladen</strong> gekennzeichnet.
+                    </div>
+
+                    <button type="submit" class="btn-mc-primary">
+                        <i class="bi bi-upload me-1"></i> Dokument hochladen
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

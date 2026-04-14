@@ -6,8 +6,12 @@ public class ObjektKurzDto
     public string Objektname { get; set; } = string.Empty;
     public string Standort { get; set; } = string.Empty;
     public string Bautraeger { get; set; } = string.Empty;
+    public string BautraegerName { get; set; } = string.Empty;
+    public string PartnerBankName { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+    public string StatusText { get; set; } = string.Empty;
     public string StatusCssClass { get; set; } = string.Empty;
+    public string StatusBadgeClass { get; set; } = string.Empty;
     public decimal Unterbeteiligungsquote { get; set; }
     public decimal Metakontosaldo { get; set; }
     public decimal Kaufpreissammelkontosaldo { get; set; }

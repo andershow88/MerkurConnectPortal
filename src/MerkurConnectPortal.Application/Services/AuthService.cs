@@ -22,11 +22,12 @@ public class AuthService : IAuthService
                 b.PasswortHash == hash);
 
         if (benutzer is null)
-            return new LoginResult(false, 0, string.Empty, string.Empty, string.Empty);
+            return new LoginResult(false, 0, false, string.Empty, string.Empty, string.Empty);
 
         return new LoginResult(
             true,
-            benutzer.PartnerBankId,
+            benutzer.PartnerBankId ?? 0,
+            benutzer.IsAdmin,
             benutzer.Anzeigename,
             benutzer.Benutzername,
             benutzer.PartnerBank?.Name ?? string.Empty);

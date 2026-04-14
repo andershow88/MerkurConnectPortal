@@ -1,0 +1,118 @@
+@model AdminObjekteViewModel
+@using MerkurConnectPortal.Web.ViewModels
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Alle Objekte";
+}
+
+<div class="mc-page-header">
+    <div>
+        <h1 class="mc-page-title"><i class="bi bi-buildings me-2"></i>Alle Objekte</h1>
+        <p class="mc-page-subtitle">Bankübergreifende Übersicht aller Bauträger-Objekte</p>
+    </div>
+</div>
+
+<!-- Suchleiste -->
+<form method="get" asp-action="Objekte">
+    <div class="mc-filter-bar">
+        <div class="input-group" style="max-width:320px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" name="suche" value="@Model.Suchbegriff" class="form-control"
+                   placeholder="Objekt, Standort, Bauträger, Partnerbank …" id="suchfeld" />
+        </div>
+        <select name="status" class="form-select" style="max-width:180px;" onchange="this.form.submit()">
+            @foreach (var opt in Model.StatusOptionen)
+            {
+                if (opt.Value == Model.StatusFilter)
+                {
+                    <option value="@opt.Value" selected>@opt.Text</option>
+                }
+                else
+                {
+                    <option value="@opt.Value">@opt.Text</option>
+                }
+            }
+        </select>
+        <button type="submit" class="btn-mc-primary"><i class="bi bi-funnel me-1"></i>Filtern</button>
+        @if (!string.IsNullOrWhiteSpace(Model.Suchbegriff) || !string.IsNullOrWhiteSpace(Model.StatusFilter))
+        {
+            <a asp-action="Objekte" class="btn-mc-ghost"><i class="bi bi-x-circle me-1"></i>Zurücksetzen</a>
+        }
+    </div>
+</form>
+
+<div class="mc-card">
+    <div class="mc-card-header">
+        <h2 class="mc-card-title"><i class="bi bi-list-ul"></i> @Model.Objekte.Count Objekt(e)</h2>
+    </div>
+    <div class="mc-card-body" style="padding:0;">
+        @if (!Model.Objekte.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-search fs-2 d-block mb-2"></i>
+                Keine Objekte gefunden.
+            </div>
+        }
+        else
+        {
+            <div class="mc-table-wrapper">
+                <table class="mc-table">
+                    <thead>
+                        <tr>
+                            <th>Objekt</th>
+                            <th>Partnerbank</th>
+                            <th>Bauträger</th>
+                            <th>Status</th>
+                            <th>Bautenstand</th>
+                            <th>Unterbeteiligung</th>
+                            <th>Metakonto</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var obj in Model.Objekte)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@obj.Objektname</div>
+                                    <div class="text-muted" style="font-size:0.75rem;">@obj.Standort</div>
+                                </td>
+                                <td style="font-size:0.82rem;">@obj.PartnerBankName</td>
+                                <td style="font-size:0.82rem; color:var(--mc-text-muted);">@obj.BautraegerName</td>
+                                <td><span class="mc-badge @obj.StatusBadgeClass">@obj.StatusText</span></td>
+                                <td style="min-width:90px;">
+                                    <div class="mc-progress-label"><span>@obj.BautenstandProzent %</span></div>
+                                    <div class="mc-progress">
+                                        <div class="mc-progress-bar @(obj.BautenstandProzent >= 100 ? "green" : obj.BautenstandProzent >= 50 ? "" : "yellow")"
+                                             data-width="@obj.BautenstandProzent" style="width:0%"></div>
+                                    </div>
+                                </td>
+                                <td style="font-size:0.82rem;">@obj.Unterbeteiligungsquote.ToString("F2") %</td>
+                                <td class="text-currency" style="font-size:0.82rem;">@obj.Metakontosaldo.ToString("N0") €</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a asp-action="ObjektDetail" asp-route-id="@obj.Id"
+                                           class="btn-mc-ghost" style="padding:0.25rem 0.6rem; font-size:0.75rem;"
+                                           title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Nachrichten" asp-route-objektId="@obj.Id"
+                                           class="btn-mc-ghost" style="padding:0.25rem 0.6rem; font-size:0.75rem;"
+                                           title="Kommunikation">
+                                            <i class="bi bi-chat-dots"></i>
+                                        </a>
+                                        <a asp-action="Dokumente" asp-route-objektId="@obj.Id"
+                                           class="btn-mc-ghost" style="padding:0.25rem 0.6rem; font-size:0.75rem;"
+                                           title="Dokumente">
+                                            <i class="bi bi-folder2-open"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

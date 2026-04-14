@@ -19,18 +19,11 @@ public class NachrichtService : INachrichtService
             .OrderBy(n => n.ErstelltAm)
             .ToListAsync();
 
-        return nachrichten.Select(n => new NachrichtDto
-        {
-            Id = n.Id,
-            ObjektId = n.ObjektId,
-            ObjektName = n.Objekt?.Objektname ?? string.Empty,
-            Absender = n.Absender,
-            Text = n.Text,
-            ErstelltAm = n.ErstelltAm
-        }).ToList();
+        return nachrichten.Select(ToDto).ToList();
     }
 
-    public async Task<NachrichtDto> SendeNachrichtAsync(int objektId, int partnerBankId, string absender, string text)
+    public async Task<NachrichtDto> SendeNachrichtAsync(
+        int objektId, int partnerBankId, string absender, string text, bool vonPartnerBank = true)
     {
         var objekt = await _db.Objekte
             .FirstOrDefaultAsync(o => o.Id == objektId && o.PartnerBankId == partnerBankId)
@@ -41,7 +34,9 @@ public class NachrichtService : INachrichtService
             ObjektId = objektId,
             Absender = absender,
             Text = text,
-            ErstelltAm = DateTime.UtcNow
+            ErstelltAm = DateTime.UtcNow,
+            VonPartnerBank = vonPartnerBank,
+            AdminGelesen = !vonPartnerBank // Admin-eigene Nachrichten gelten als bereits gelesen
         };
 
         _db.Nachrichten.Add(nachricht);
@@ -54,7 +49,19 @@ public class NachrichtService : INachrichtService
             ObjektName = objekt.Objektname,
             Absender = absender,
             Text = text,
-            ErstelltAm = nachricht.ErstelltAm
+            ErstelltAm = nachricht.ErstelltAm,
+            VonPartnerBank = nachricht.VonPartnerBank
         };
     }
+
+    private static NachrichtDto ToDto(Nachricht n) => new()
+    {
+        Id = n.Id,
+        ObjektId = n.ObjektId,
+        ObjektName = n.Objekt?.Objektname ?? string.Empty,
+        Absender = n.Absender,
+        Text = n.Text,
+        ErstelltAm = n.ErstelltAm,
+        VonPartnerBank = n.VonPartnerBank
+    };
 }

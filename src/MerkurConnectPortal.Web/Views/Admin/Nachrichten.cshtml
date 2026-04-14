@@ -1,0 +1,113 @@
+@model AdminNachrichtenViewModel
+@using MerkurConnectPortal.Web.ViewModels
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Kommunikation – {Model.ObjektName}";
+    var anzeigename = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? "Merkur Privatbank";
+}
+
+<div class="mc-page-header">
+    <div>
+        <div class="mb-1">
+            <a asp-action="ObjektDetail" asp-route-id="@Model.ObjektId"
+               class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                <i class="bi bi-arrow-left"></i> Zurück zum Objekt
+            </a>
+        </div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-chat-dots me-2" style="color:var(--mc-primary);font-size:1.3rem;"></i>
+            Kommunikation
+        </h1>
+        <p class="mc-page-subtitle">@Model.ObjektName · <span class="text-muted">@Model.PartnerBankName</span></p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-chat-text"></i> Nachrichtenverlauf</h2>
+                <span class="text-muted small">@Model.Nachrichten.Count Nachricht(en)</span>
+            </div>
+            <div class="mc-card-body">
+                @if (!Model.Nachrichten.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-chat-square fs-2 d-block mb-2"></i>
+                        Noch keine Nachrichten vorhanden.
+                    </div>
+                }
+                else
+                {
+                    <div class="mc-message-list">
+                        @foreach (var msg in Model.Nachrichten)
+                        {
+                            @* Admin (Merkur Bank) = from-bank (linke Seite) | Partnerbank = from-me (rechte Seite) *@
+                            var cssClass = msg.VonPartnerBank ? "from-me" : "from-bank";
+                            <div class="mc-message @cssClass">
+                                <div class="mc-message-bubble">@msg.Text</div>
+                                <div class="mc-message-meta">
+                                    <strong>@msg.Absender</strong>
+                                    @if (msg.VonPartnerBank)
+                                    {
+                                        <span class="ms-1" style="font-size:0.63rem; color:#c0392b; font-weight:600;">Partnerbank</span>
+                                    }
+                                    · @msg.ErstelltAm.ToString("dd.MM.yyyy HH:mm") Uhr
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Antworten als Merkur Bank -->
+        <div class="mc-card mb-3">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-pencil-square"></i> Als Merkur Privatbank antworten</h2>
+            </div>
+            <div class="mc-card-body">
+                <form asp-action="NachrichtSenden" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ObjektId" value="@Model.ObjektId" />
+                    <input type="hidden" name="ObjektName" value="@Model.ObjektName" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Von</label>
+                        <div class="form-control" style="background:var(--mc-bg); font-size:0.85rem; color:var(--mc-text-muted);">
+                            <i class="bi bi-shield-fill-check me-1" style="color:#c0392b;"></i>
+                            @anzeigename (Merkur Privatbank KGaA)
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Nachricht</label>
+                        <textarea name="NeueNachricht" class="form-control" rows="5"
+                                  placeholder="Ihre Nachricht an @Model.PartnerBankName …"
+                                  style="font-size:0.85rem; resize:vertical;" maxlength="4000"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-mc-primary w-100">
+                        <i class="bi bi-send-fill me-1"></i> Nachricht senden
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Objekt-Info -->
+        <div class="mc-card">
+            <div class="mc-card-body-sm">
+                <div class="text-muted" style="font-size:0.78rem;">
+                    <i class="bi bi-building me-1 text-primary"></i>
+                    <strong>@Model.ObjektName</strong><br />
+                    Partnerbank: @Model.PartnerBankName<br /><br />
+                    <a asp-action="Dokumente" asp-route-objektId="@Model.ObjektId" class="text-primary">
+                        <i class="bi bi-folder2-open me-1"></i> Dokumente zu diesem Objekt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

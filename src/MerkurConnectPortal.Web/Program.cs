@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 // --- Services ---
 builder.Services.AddControllersWithViews();
 
-// Datenbankkontext (SQLite für MVP, per Konfiguration auf SQL Server umstellbar)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Data Source=merkurconnect.db";
 
@@ -32,6 +31,7 @@ builder.Services.AddScoped<IObjektService, ObjektService>();
 builder.Services.AddScoped<IDokumentService, DokumentService>();
 builder.Services.AddScoped<INachrichtService, NachrichtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // Cookie-Authentifizierung
 builder.Services.AddAuthentication("MerkurCookieAuth")

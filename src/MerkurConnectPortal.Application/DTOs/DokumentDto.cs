@@ -12,6 +12,7 @@ public class DokumentDto
     public string Status { get; set; } = string.Empty;
     public string Dateipfad { get; set; } = string.Empty;
     public long DateigroesseBytes { get; set; }
+    public bool VonPartnerBank { get; set; }
 
     public string DateigroesseFormatiert =>
         DateigroesseBytes < 1024 ? $"{DateigroesseBytes} B"

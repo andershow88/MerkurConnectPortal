@@ -29,9 +29,7 @@ public class DokumentService : IDokumentService
             .Where(d => d.Objekt.PartnerBankId == partnerBankId);
 
         if (!string.IsNullOrWhiteSpace(kategorie) && Enum.TryParse<DokumentKategorie>(kategorie, out var kat))
-        {
             query = query.Where(d => d.Kategorie == kat);
-        }
 
         var dokumente = await query.OrderByDescending(d => d.HochgeladenAm).ToListAsync();
         return dokumente.Select(ToDto).ToList();
@@ -53,9 +51,9 @@ public class DokumentService : IDokumentService
         string dateiname,
         string kategorie,
         string hochgeladenVon,
-        string uploadVerzeichnis)
+        string uploadVerzeichnis,
+        bool vonPartnerBank = true)
     {
-        // Sicherstellen, dass das Objekt zur PartnerBank gehört
         var objekt = await _db.Objekte
             .FirstOrDefaultAsync(o => o.Id == objektId && o.PartnerBankId == partnerBankId)
             ?? throw new InvalidOperationException("Objekt nicht gefunden oder kein Zugriff.");
@@ -82,7 +80,9 @@ public class DokumentService : IDokumentService
             HochgeladenAm = DateTime.UtcNow,
             Status = DokumentStatus.Aktiv,
             Dateipfad = eindeutigerName,
-            DateigroesseBytes = groesse
+            DateigroesseBytes = groesse,
+            VonPartnerBank = vonPartnerBank,
+            AdminGelesen = !vonPartnerBank
         };
 
         _db.Dokumente.Add(dokument);
@@ -96,14 +96,10 @@ public class DokumentService : IDokumentService
         int dokumentId, int partnerBankId)
     {
         var dto = await GetDokumentAsync(dokumentId, partnerBankId);
-        if (dto is null) return null;
-
-        // Dateipfad ist relativ gespeichert; die Web-Schicht muss den Basispfad kennen
-        // Hier geben wir nur den Pfad zurück – der Controller löst ihn auf
-        return null;
+        return dto is null ? null : null;
     }
 
-    private static DokumentDto ToDto(Dokument d) => new()
+    public static DokumentDto ToDto(Dokument d) => new()
     {
         Id = d.Id,
         ObjektId = d.ObjektId,
@@ -114,10 +110,11 @@ public class DokumentService : IDokumentService
         HochgeladenAm = d.HochgeladenAm,
         Status = d.Status == DokumentStatus.Aktiv ? "Aktiv" : "Archiviert",
         Dateipfad = d.Dateipfad,
-        DateigroesseBytes = d.DateigroesseBytes
+        DateigroesseBytes = d.DateigroesseBytes,
+        VonPartnerBank = d.VonPartnerBank
     };
 
-    private static string GetKategorieBezeichnung(DokumentKategorie k) => k switch
+    public static string GetKategorieBezeichnung(DokumentKategorie k) => k switch
     {
         DokumentKategorie.Vertragsdokumente => "Vertragsdokumente",
         DokumentKategorie.Reportings => "Reportings",

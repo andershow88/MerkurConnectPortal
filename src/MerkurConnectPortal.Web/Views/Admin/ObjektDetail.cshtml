@@ -1,0 +1,153 @@
+@model ObjektDetailDto
+@using MerkurConnectPortal.Application.DTOs
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = Model.Objektname;
+    var progressClass = Model.BautenstandProzent >= 80 ? "green" : Model.BautenstandProzent >= 40 ? "" : "yellow";
+    var verkaufsProgressClass = Model.Verkaufsquote >= 80 ? "green" : Model.Verkaufsquote >= 50 ? "" : "yellow";
+}
+
+<div class="mc-page-header">
+    <div>
+        <div class="mb-1">
+            <a asp-action="Objekte" class="btn-mc-ghost" style="padding:0.3rem 0.7rem; font-size:0.78rem;">
+                <i class="bi bi-arrow-left"></i> Zurück zur Übersicht
+            </a>
+        </div>
+        <h1 class="mc-page-title">@Model.Objektname</h1>
+        <p class="mc-page-subtitle">
+            <i class="bi bi-geo-alt me-1"></i>@Model.Standort &nbsp;·&nbsp;
+            <i class="bi bi-building me-1"></i>@Model.Bautraeger &nbsp;·&nbsp;
+            <i class="bi bi-bank me-1"></i>@Model.PartnerBankName
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="mc-badge @Model.StatusCssClass" style="font-size:0.82rem; padding:0.4rem 0.9rem;">
+            @Model.Status
+        </span>
+        <a asp-action="Dokumente" asp-route-objektId="@Model.Id" class="btn-mc-outline">
+            <i class="bi bi-folder2-open"></i> Dokumente (@Model.AnzahlDokumente)
+        </a>
+        <a asp-action="Nachrichten" asp-route-objektId="@Model.Id" class="btn-mc-primary">
+            <i class="bi bi-chat-dots"></i> Kommunikation
+            @if (Model.AnzahlNachrichten > 0)
+            {
+                <span class="ms-1">(@Model.AnzahlNachrichten)</span>
+            }
+        </a>
+    </div>
+</div>
+
+<!-- Unterbeteiligungsinfo -->
+<div class="mc-card border-start-blue mb-3">
+    <div class="mc-card-body-sm">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <div class="mc-kpi-label">Unterbeteiligungsquote</div>
+                <div class="mc-kpi-value" style="font-size:2rem; color:var(--mc-primary);">
+                    @Model.Unterbeteiligungsquote.ToString("N2") %
+                </div>
+            </div>
+            <div class="flex-grow-1" style="border-left:1px solid var(--mc-border); padding-left:1.5rem;">
+                <div class="text-muted small">
+                    <strong>@Model.PartnerBankName</strong> ist zu
+                    <strong>@Model.Unterbeteiligungsquote.ToString("N2") %</strong>
+                    an diesem Bauträgerprojekt unterbeteiligt.
+                </div>
+            </div>
+            <div class="text-muted small">
+                Letzte Aktualisierung:<br />
+                <strong>@Model.LetzteAktualisierung.ToString("dd.MM.yyyy")</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="mc-card h-100">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-cash-stack"></i> Finanzdaten</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="mc-info-grid" style="grid-template-columns:1fr 1fr;">
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Metakontosaldo</div>
+                        <div class="mc-info-value large text-currency">@Model.Metakontosaldo.ToString("N0") €</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Kaufpreissammelkonto</div>
+                        <div class="mc-info-value large text-currency">@Model.Kaufpreissammelkontosaldo.ToString("N0") €</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Avale</div>
+                        <div class="mc-info-value text-currency">@Model.Avale.ToString("N0") €</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Status</div>
+                        <span class="mc-badge @Model.StatusCssClass">@Model.Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="mc-card h-100">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-house-door"></i> Vermarktung</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="mc-info-grid" style="grid-template-columns:1fr 1fr; margin-bottom:1rem;">
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Einheiten gesamt</div>
+                        <div class="mc-info-value large">@Model.EinheitenGesamt</div>
+                    </div>
+                    <div class="mc-info-item">
+                        <div class="mc-info-label">Einheiten verkauft</div>
+                        <div class="mc-info-value large text-success">@Model.EinheitenVerkauft</div>
+                    </div>
+                </div>
+                <div class="mc-progress-label">
+                    <span class="fw-semibold" style="font-size:0.8rem;">Verkaufsquote</span>
+                    <span class="fw-bold">@Model.Verkaufsquote.ToString("N1") %</span>
+                </div>
+                <div class="mc-progress" style="height:10px;">
+                    <div class="mc-progress-bar @verkaufsProgressClass" data-width="@Model.Verkaufsquote" style="width:0%"></div>
+                </div>
+                <div class="text-muted small mt-2">
+                    @(Model.EinheitenGesamt - Model.EinheitenVerkauft) Einheiten noch verfügbar
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-hammer"></i> Baufortschritt</h2>
+            </div>
+            <div class="mc-card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center mb-3 mb-md-0">
+                        <div style="font-size:3rem; font-weight:800; color:var(--mc-primary); line-height:1;">
+                            @Model.BautenstandProzent.ToString("N0") %
+                        </div>
+                        <div class="text-muted small">Bautenstand</div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted small">Baubeginn</span>
+                            <span class="fw-semibold small">Aktuell: @Model.BautenstandProzent.ToString("N0") %</span>
+                            <span class="text-muted small">Fertigstellung</span>
+                        </div>
+                        <div class="mc-progress" style="height:20px; border-radius:6px;">
+                            <div class="mc-progress-bar @progressClass" data-width="@Model.BautenstandProzent"
+                                 style="width:0%; border-radius:6px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

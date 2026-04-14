@@ -12,4 +12,10 @@ public class Dokument
     public DokumentStatus Status { get; set; }
     public string Dateipfad { get; set; } = string.Empty;
     public long DateigroesseBytes { get; set; }
+
+    /// <summary>true = wurde von einer Partnerbank hochgeladen (für Admin-Benachrichtigung).</summary>
+    public bool VonPartnerBank { get; set; }
+
+    /// <summary>true = Admin hat dieses Dokument bereits gesehen.</summary>
+    public bool AdminGelesen { get; set; }
 }

@@ -3,9 +3,9 @@ using MerkurConnectPortal.Domain.Entities;
 
 namespace MerkurConnectPortal.Application.Services;
 
-internal static class ObjektMappingHelper
+public static class ObjektMappingHelper
 {
-    internal static string GetStatusBezeichnung(ObjektStatus status) => status switch
+    public static string GetStatusBezeichnung(ObjektStatus status) => status switch
     {
         ObjektStatus.InPlanung => "In Planung",
         ObjektStatus.InBau => "In Bau",
@@ -14,7 +14,7 @@ internal static class ObjektMappingHelper
         _ => "Unbekannt"
     };
 
-    internal static string GetStatusCssClass(ObjektStatus status) => status switch
+    public static string GetStatusCssClass(ObjektStatus status) => status switch
     {
         ObjektStatus.InPlanung => "badge-warning",
         ObjektStatus.InBau => "badge-primary",
@@ -23,12 +23,41 @@ internal static class ObjektMappingHelper
         _ => "badge-secondary"
     };
 
-    internal static ObjektKurzDto ToKurzDto(Objekt o) => new()
+    public static ObjektKurzDto ToKurzDto(Objekt o)
+    {
+        var statusText = GetStatusBezeichnung(o.Status);
+        var statusClass = GetStatusCssClass(o.Status);
+        return new ObjektKurzDto
+        {
+            Id = o.Id,
+            Objektname = o.Objektname,
+            Standort = o.Standort,
+            Bautraeger = o.Bautraeger?.Name ?? string.Empty,
+            BautraegerName = o.Bautraeger?.Name ?? string.Empty,
+            PartnerBankName = o.PartnerBank?.Name ?? string.Empty,
+            Status = statusText,
+            StatusText = statusText,
+            StatusCssClass = statusClass,
+            StatusBadgeClass = statusClass,
+            Unterbeteiligungsquote = o.Unterbeteiligungsquote,
+            Metakontosaldo = o.Metakontosaldo,
+            Kaufpreissammelkontosaldo = o.Kaufpreissammelkontosaldo,
+            Avale = o.Avale,
+            EinheitenGesamt = o.EinheitenGesamt,
+            EinheitenVerkauft = o.EinheitenVerkauft,
+            Verkaufsquote = o.Verkaufsquote,
+            BautenstandProzent = o.BautenstandProzent,
+            LetzteAktualisierung = o.LetzteAktualisierung
+        };
+    }
+
+    public static ObjektDetailDto ToDetailDto(Objekt o) => new()
     {
         Id = o.Id,
         Objektname = o.Objektname,
         Standort = o.Standort,
         Bautraeger = o.Bautraeger?.Name ?? string.Empty,
+        PartnerBankName = o.PartnerBank?.Name ?? string.Empty,
         Status = GetStatusBezeichnung(o.Status),
         StatusCssClass = GetStatusCssClass(o.Status),
         Unterbeteiligungsquote = o.Unterbeteiligungsquote,
@@ -39,6 +68,8 @@ internal static class ObjektMappingHelper
         EinheitenVerkauft = o.EinheitenVerkauft,
         Verkaufsquote = o.Verkaufsquote,
         BautenstandProzent = o.BautenstandProzent,
-        LetzteAktualisierung = o.LetzteAktualisierung
+        LetzteAktualisierung = o.LetzteAktualisierung,
+        AnzahlDokumente = o.Dokumente.Count,
+        AnzahlNachrichten = o.Nachrichten.Count
     };
 }

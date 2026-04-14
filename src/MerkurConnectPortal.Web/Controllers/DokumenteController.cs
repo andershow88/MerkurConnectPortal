@@ -23,27 +23,18 @@ public class DokumenteController : BaseController
         _env = env;
     }
 
-    // Alle Dokumente der Partnerbank (optional gefiltert)
     public async Task<IActionResult> Index(string? kategorie)
     {
-        var dokumente = await _dokumentService.GetAlleDokumenteByPartnerBankAsync(
-            GetPartnerBankId(), kategorie);
-
-        return View(new DokumentListViewModel
-        {
-            Dokumente = dokumente,
-            KategorieFilter = kategorie
-        });
+        var dokumente = await _dokumentService.GetAlleDokumenteByPartnerBankAsync(GetPartnerBankId(), kategorie);
+        return View(new DokumentListViewModel { Dokumente = dokumente, KategorieFilter = kategorie });
     }
 
-    // Dokumente eines bestimmten Objekts
     public async Task<IActionResult> Objekt(int objektId)
     {
         var objekt = await _objektService.GetObjektDetailAsync(objektId, GetPartnerBankId());
         if (objekt is null) return NotFound();
 
         var dokumente = await _dokumentService.GetDokumenteByObjektAsync(objektId, GetPartnerBankId());
-
         return View("Index", new DokumentListViewModel
         {
             ObjektId = objektId,
@@ -58,19 +49,14 @@ public class DokumenteController : BaseController
         var objekt = await _objektService.GetObjektDetailAsync(objektId, GetPartnerBankId());
         if (objekt is null) return NotFound();
 
-        return View(new DokumentUploadViewModel
-        {
-            ObjektId = objektId,
-            ObjektName = objekt.Objektname
-        });
+        return View(new DokumentUploadViewModel { ObjektId = objektId, ObjektName = objekt.Objektname });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Upload(DokumentUploadViewModel model)
     {
-        if (!ModelState.IsValid)
-            return View(model);
+        if (!ModelState.IsValid) return View(model);
 
         if (model.Datei is null || model.Datei.Length == 0)
         {
@@ -90,14 +76,11 @@ public class DokumenteController : BaseController
             _config.GetValue<string>("AppSettings:UploadVerzeichnis") ?? "wwwroot/uploads");
 
         await using var stream = model.Datei.OpenReadStream();
+        // Partnerbank lädt hoch → VonPartnerBank = true
         await _dokumentService.UploadDokumentAsync(
-            model.ObjektId,
-            GetPartnerBankId(),
-            stream,
-            model.Datei.FileName,
-            model.Kategorie,
-            GetAnzeigename(),
-            uploadVerzeichnis);
+            model.ObjektId, GetPartnerBankId(), stream,
+            model.Datei.FileName, model.Kategorie, GetAnzeigename(),
+            uploadVerzeichnis, vonPartnerBank: true);
 
         TempData["Erfolgsmeldung"] = $"Dokument '{model.Datei.FileName}' wurde erfolgreich hochgeladen.";
         return RedirectToAction("Objekt", new { objektId = model.ObjektId });
@@ -114,15 +97,11 @@ public class DokumenteController : BaseController
 
         var dateipfad = Path.Combine(uploadVerzeichnis, dokument.Dateipfad);
 
-        // Seed-Dokumente haben keine echte Datei — Demo-PDF zurückgeben
         if (!System.IO.File.Exists(dateipfad))
-        {
             return File(ErzeugePlatzhalterPdf(dokument.Dateiname), "application/pdf", dokument.Dateiname);
-        }
 
         var stream = System.IO.File.OpenRead(dateipfad);
-        var contentType = GetContentType(dokument.Dateiname);
-        return File(stream, contentType, dokument.Dateiname);
+        return File(stream, GetContentType(dokument.Dateiname), dokument.Dateiname);
     }
 
     private static string GetContentType(string dateiname)
@@ -143,7 +122,6 @@ public class DokumenteController : BaseController
 
     private static byte[] ErzeugePlatzhalterPdf(string dateiname)
     {
-        // Minimalst-PDF als Platzhalter für Seed-Daten
         var pdfText = $"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj " +
                       $"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj " +
                       $"3 0 obj<</Type/Page/MediaBox[0 0 595 842]/Parent 2 0 R/Resources<<>>>>endobj\n" +

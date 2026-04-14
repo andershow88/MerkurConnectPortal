@@ -18,7 +18,11 @@ public class AccountController : Controller
     public IActionResult Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
+        {
+            if (User.IsInRole("Admin"))
+                return RedirectToAction("Index", "Admin");
             return RedirectToAction("Index", "Dashboard");
+        }
 
         return View(new LoginViewModel { ReturnUrl = returnUrl });
     }
@@ -43,6 +47,7 @@ public class AccountController : Controller
         {
             new(ClaimTypes.Name, result.Benutzername),
             new(ClaimTypes.GivenName, result.Anzeigename),
+            new(ClaimTypes.Role, result.IsAdmin ? "Admin" : "PartnerBank"),
             new("PartnerBankId", result.PartnerBankId.ToString()),
             new("PartnerBankName", result.PartnerBankName)
         };
@@ -55,7 +60,10 @@ public class AccountController : Controller
         if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             return Redirect(model.ReturnUrl);
 
-        return RedirectToAction("Index", "Dashboard");
+        // Admin → Admin-Bereich, Partnerbank → Dashboard
+        return result.IsAdmin
+            ? RedirectToAction("Index", "Admin")
+            : RedirectToAction("Index", "Dashboard");
     }
 
     [HttpPost]

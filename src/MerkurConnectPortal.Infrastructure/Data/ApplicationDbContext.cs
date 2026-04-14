@@ -55,6 +55,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             e.Property(d => d.Dateiname).IsRequired().HasMaxLength(500);
             e.Property(d => d.HochgeladenVon).HasMaxLength(200);
             e.Property(d => d.Dateipfad).HasMaxLength(1000);
+            e.Property(d => d.VonPartnerBank).HasDefaultValue(false);
+            e.Property(d => d.AdminGelesen).HasDefaultValue(false);
             e.HasOne(d => d.Objekt).WithMany(o => o.Dokumente).HasForeignKey(d => d.ObjektId);
         });
 
@@ -63,6 +65,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             e.HasKey(n => n.Id);
             e.Property(n => n.Absender).HasMaxLength(200);
             e.Property(n => n.Text).HasMaxLength(4000);
+            e.Property(n => n.VonPartnerBank).HasDefaultValue(false);
+            e.Property(n => n.AdminGelesen).HasDefaultValue(false);
             e.HasOne(n => n.Objekt).WithMany(o => o.Nachrichten).HasForeignKey(n => n.ObjektId);
         });
 
@@ -74,7 +78,12 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             e.Property(b => b.PasswortHash).IsRequired().HasMaxLength(100);
             e.Property(b => b.Anzeigename).HasMaxLength(200);
             e.Property(b => b.EMail).HasMaxLength(200);
-            e.HasOne(b => b.PartnerBank).WithMany(p => p.Benutzer).HasForeignKey(b => b.PartnerBankId);
+            e.Property(b => b.IsAdmin).HasDefaultValue(false);
+            // PartnerBankId ist nullable (Admin-Benutzer haben keine Partnerbank)
+            e.HasOne(b => b.PartnerBank)
+             .WithMany(p => p.Benutzer)
+             .HasForeignKey(b => b.PartnerBankId)
+             .IsRequired(false);
         });
     }
 }

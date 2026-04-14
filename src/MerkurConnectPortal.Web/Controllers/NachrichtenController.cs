@@ -42,11 +42,13 @@ public class NachrichtenController : BaseController
             return View("Index", model);
         }
 
+        // Partnerbank sendet → VonPartnerBank = true
         await _nachrichtService.SendeNachrichtAsync(
             model.ObjektId,
             GetPartnerBankId(),
             GetAnzeigename(),
-            model.NeueNachricht);
+            model.NeueNachricht,
+            vonPartnerBank: true);
 
         return RedirectToAction("Index", new { objektId = model.ObjektId });
     }

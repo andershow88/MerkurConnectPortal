@@ -14,6 +14,7 @@ public interface IDokumentService
         string dateiname,
         string kategorie,
         string hochgeladenVon,
-        string uploadVerzeichnis);
+        string uploadVerzeichnis,
+        bool vonPartnerBank = true);
     Task<(Stream stream, string dateiname, string contentType)?> DownloadDokumentAsync(int dokumentId, int partnerBankId);
 }

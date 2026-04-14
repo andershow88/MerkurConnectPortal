@@ -1,0 +1,166 @@
+@model AdminDashboardViewModel
+@using MerkurConnectPortal.Web.ViewModels
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin – Übersicht";
+    ViewData["Breadcrumb"] = "<span>Übersicht</span>";
+    ViewBag.UngeleseneAnzahl = Model.Dashboard.UngeleseneAktivitaeten;
+}
+
+<div class="mc-page-header">
+    <div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-speedometer2 me-2" style="color:var(--mc-primary);"></i>
+            Verwaltungsübersicht
+        </h1>
+        <p class="mc-page-subtitle">Gesamtübersicht aller Partnerbanken und Objekte</p>
+    </div>
+    @if (Model.Dashboard.UngeleseneAktivitaeten > 0)
+    {
+        <a asp-action="Aktivitaeten" class="btn-mc-primary" style="background:#c0392b;">
+            <i class="bi bi-bell-fill me-1"></i>
+            @Model.Dashboard.UngeleseneAktivitaeten neue Aktivität(en)
+        </a>
+    }
+</div>
+
+<!-- KPI-Karten -->
+<div class="mc-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));">
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon blue"><i class="bi bi-bank"></i></div>
+        <div class="mc-kpi-label">Partnerbanken</div>
+        <div class="mc-kpi-value">@Model.Dashboard.AnzahlPartnerbanken</div>
+    </div>
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon navy"><i class="bi bi-buildings"></i></div>
+        <div class="mc-kpi-label">Objekte gesamt</div>
+        <div class="mc-kpi-value">@Model.Dashboard.AnzahlObjekteGesamt</div>
+        <div class="mc-kpi-sub">davon @Model.Dashboard.AnzahlObjekteInBau in Bau</div>
+    </div>
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon blue"><i class="bi bi-currency-euro"></i></div>
+        <div class="mc-kpi-label">Metakonten gesamt</div>
+        <div class="mc-kpi-value text-currency" style="font-size:1.15rem;">@Model.Dashboard.GesamtMetakontosaldo.ToString("N0") €</div>
+    </div>
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon green"><i class="bi bi-safe"></i></div>
+        <div class="mc-kpi-label">Kaufpreissammelkonten</div>
+        <div class="mc-kpi-value text-currency" style="font-size:1.15rem;">@Model.Dashboard.GesamtKaufpreissammelkonto.ToString("N0") €</div>
+    </div>
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon gold"><i class="bi bi-shield-check"></i></div>
+        <div class="mc-kpi-label">Avale gesamt</div>
+        <div class="mc-kpi-value text-currency" style="font-size:1.15rem;">@Model.Dashboard.GesamtAvale.ToString("N0") €</div>
+    </div>
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon purple"><i class="bi bi-folder2"></i></div>
+        <div class="mc-kpi-label">Dokumente</div>
+        <div class="mc-kpi-value">@Model.Dashboard.AnzahlDokumenteGesamt</div>
+    </div>
+    <div class="mc-kpi-card">
+        <div class="mc-kpi-icon" style="background:#fdecea; color:#c0392b;"><i class="bi bi-bell"></i></div>
+        <div class="mc-kpi-label">Ungelesene Aktivitäten</div>
+        <div class="mc-kpi-value" style="color:@(Model.Dashboard.UngeleseneAktivitaeten > 0 ? "#c0392b" : "var(--mc-text)");">
+            @Model.Dashboard.UngeleseneAktivitaeten
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Partnerbanken -->
+    <div class="col-lg-5">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-bank"></i> Partnerbanken</h2>
+            </div>
+            <div class="mc-card-body" style="padding:0;">
+                <table class="mc-table">
+                    <thead>
+                        <tr>
+                            <th>Bank</th>
+                            <th>Objekte</th>
+                            <th>Neu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bank in Model.Dashboard.Partnerbanken)
+                        {
+                            var neuAnzahl = bank.UngeleseneNachrichten + bank.UngelesèneDokumente;
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold" style="font-size:0.85rem;">@bank.Name</div>
+                                    <div class="text-muted" style="font-size:0.75rem;">@bank.Ansprechpartner</div>
+                                </td>
+                                <td><span class="mc-badge badge-primary">@bank.AnzahlObjekte</span></td>
+                                <td>
+                                    @if (neuAnzahl > 0)
+                                    {
+                                        <span class="mc-badge" style="background:#fdecea; color:#c0392b;">
+                                            <i class="bi bi-bell-fill" style="font-size:0.65rem;"></i> @neuAnzahl
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size:0.75rem;">–</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Neueste Objekte -->
+    <div class="col-lg-7">
+        <div class="mc-card">
+            <div class="mc-card-header">
+                <h2 class="mc-card-title"><i class="bi bi-buildings"></i> Zuletzt aktualisierte Objekte</h2>
+                <a asp-action="Objekte" class="btn-mc-ghost" style="font-size:0.78rem; padding:0.3rem 0.7rem;">
+                    Alle anzeigen <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="mc-card-body" style="padding:0;">
+                <table class="mc-table">
+                    <thead>
+                        <tr>
+                            <th>Objekt</th>
+                            <th>Partnerbank</th>
+                            <th>Status</th>
+                            <th>Bautenstand</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var obj in Model.Dashboard.NeuesteObjekte)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold" style="font-size:0.85rem;">@obj.Objektname</div>
+                                    <div class="text-muted" style="font-size:0.75rem;">@obj.Standort</div>
+                                </td>
+                                <td style="font-size:0.8rem;">@obj.PartnerBankName</td>
+                                <td><span class="mc-badge @obj.StatusBadgeClass">@obj.StatusText</span></td>
+                                <td style="min-width:80px;">
+                                    <div class="mc-progress-label" style="font-size:0.7rem;">
+                                        <span>@obj.BautenstandProzent %</span>
+                                    </div>
+                                    <div class="mc-progress">
+                                        <div class="mc-progress-bar @(obj.BautenstandProzent >= 100 ? "green" : obj.BautenstandProzent >= 50 ? "" : "yellow")"
+                                             data-width="@obj.BautenstandProzent" style="width:0%"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a asp-action="ObjektDetail" asp-route-id="@obj.Id" class="btn-mc-ghost" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
