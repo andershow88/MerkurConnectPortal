@@ -1084,6 +1084,135 @@ a:hover { text-decoration: underline; }
 }
 
 /* ============================================================
+   INFO-BOXEN (theme-aware) + Dark-Mode-Overrides Feintuning
+   ============================================================ */
+.mc-info-box {
+    padding: 1rem;
+    border-radius: var(--mc-radius);
+    border: 1px solid var(--mc-border);
+    background: var(--mc-bg);
+    font-size: 0.78rem;
+    color: var(--mc-text-muted);
+}
+.mc-info-box-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: .35rem;
+}
+.mc-info-box-default .mc-info-box-title { color: var(--mc-text); }
+
+.mc-info-box-success {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.35);
+}
+.mc-info-box-success .mc-info-box-title { color: #2e7d32; }
+
+.mc-info-box-warning {
+    background: rgba(234, 179, 8, 0.10);
+    border-color: rgba(234, 179, 8, 0.40);
+}
+.mc-info-box-warning .mc-info-box-title { color: #a8760b; }
+
+[data-theme="dark"] .mc-info-box-success .mc-info-box-title { color: #7abf90; }
+[data-theme="dark"] .mc-info-box-warning .mc-info-box-title { color: #d4b070; }
+
+.mc-contact-icon-success {
+    background: rgba(34, 197, 94, 0.12) !important;
+    color: #16a34a !important;
+}
+[data-theme="dark"] .mc-contact-icon-success {
+    background: rgba(122, 191, 144, 0.15) !important;
+    color: #7abf90 !important;
+}
+
+[data-theme="dark"] .mc-contact-card {
+    background: #16162a;
+    border-color: var(--mc-border);
+}
+
+[data-theme="dark"] .mc-nav-link:hover { background: #252538; color: var(--mc-text); }
+[data-theme="dark"] .mc-logout-btn:hover { background: #252538; color: var(--mc-text); }
+[data-theme="dark"] .btn-mc-ghost:hover { background: #252538; color: var(--mc-text); }
+[data-theme="dark"] .mc-table tbody tr { border-bottom-color: var(--mc-border); }
+
+[data-theme="dark"] .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--mc-text);
+    --bs-table-color-state: var(--mc-text);
+    --bs-table-border-color: var(--mc-border);
+    --bs-table-striped-bg: #181828;
+    --bs-table-hover-bg: #1c1c30;
+    color: var(--mc-text);
+    background-color: transparent;
+}
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+    border-color: var(--mc-border);
+    color: var(--mc-text);
+    background-color: transparent;
+}
+[data-theme="dark"] .text-muted { color: var(--mc-text-muted) !important; }
+
+[data-theme="dark"] hr {
+    border-color: var(--mc-border);
+    color: var(--mc-border);
+}
+
+[data-theme="dark"] code {
+    background: #252538;
+    color: #d4b070;
+    padding: 0.05em 0.35em;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .modal-content {
+    background: var(--mc-bg-card);
+    color: var(--mc-text);
+    border-color: var(--mc-border);
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: var(--mc-border);
+}
+
+[data-theme="dark"] .list-group-item {
+    background: var(--mc-bg-card);
+    color: var(--mc-text);
+    border-color: var(--mc-border);
+}
+
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-light {
+    background-color: var(--mc-bg-card) !important;
+    color: var(--mc-text) !important;
+}
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-body {
+    color: var(--mc-text) !important;
+}
+
+[data-theme="dark"] .accordion-item {
+    background: var(--mc-bg-card);
+    border-color: var(--mc-border);
+}
+[data-theme="dark"] .accordion-button {
+    background: var(--mc-bg-card);
+    color: var(--mc-text);
+}
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+    background: #252538;
+    color: var(--mc-text);
+    box-shadow: none;
+}
+[data-theme="dark"] .accordion-button::after {
+    filter: invert(0.85);
+}
+[data-theme="dark"] .accordion-body {
+    background: var(--mc-bg-card);
+    color: var(--mc-text);
+}
+
+/* ============================================================
    LOGIN – Demo-Zugänge (Zauberwort-Grid)
    ============================================================ */
 .mc-login-divider {

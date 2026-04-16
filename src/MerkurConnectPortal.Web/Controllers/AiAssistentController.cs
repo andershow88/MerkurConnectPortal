@@ -28,6 +28,8 @@ public class AiAssistentController : Controller
     private int AktuellerPartnerBankId =>
         int.TryParse(User.FindFirst("PartnerBankId")?.Value, out var id) ? id : 0;
 
+    private bool IstAdmin => User.IsInRole("Admin");
+
     [HttpPost]
     public async Task<IActionResult> Fragen([FromBody] ChatAnfrageDto anfrage)
     {
@@ -48,19 +50,25 @@ public class AiAssistentController : Controller
             foreach (var msg in anfrage.Verlauf ?? [])
                 messages.Add(new { role = msg.Rolle, content = msg.Text });
 
+            var rollenHinweis = IstAdmin
+                ? "mandantenübergreifend, alle Partnerbanken"
+                : "ausschließlich für Ihre Partnerbank";
             var userContent = string.IsNullOrWhiteSpace(kontext)
                 ? anfrage.Frage
-                : $"{anfrage.Frage}\n\n---\n*Aktuelle Systemdaten (automatisch geladen, ausschließlich für Ihre Partnerbank):*\n{kontext}";
+                : $"{anfrage.Frage}\n\n---\n*Aktuelle Systemdaten (automatisch geladen, {rollenHinweis}):*\n{kontext}";
 
             messages.Add(new { role = "user", content = userContent });
 
-            const string systemPrompt = """
+            var systemPrompt = $$"""
                 Du bist der KI-Assistent des MerkurConnectPortals der Merkur Privatbank KGaA.
                 Das Portal ist ein Unterbeteiligungs- und Informationsportal für Partnerbanken
                 (Volksbanken, Sparkassen) bei gemeinsamen Bauträgerfinanzierungen.
 
+                **Rolle des aktuellen Benutzers:** {{(IstAdmin ? "Admin (Merkur Privatbank) – sieht mandantenübergreifend alle Partnerbanken, Objekte, Dokumente und Nachrichten." : "Partnerbank-Mitarbeiter – sieht ausschließlich die eigene Partnerbank.")}}
+
                 **Software-Übersicht:**
                 - Partnerbanken sehen ausschließlich ihre eigenen Objekte, Dokumente und Nachrichten (Mandantentrennung)
+                - Admins der Merkur Privatbank sehen alle Partnerbanken und deren Daten
                 - Ein Objekt ist ein Bauträger-Finanzierungsprojekt mit Unterbeteiligungsquote
                 - Je Objekt gibt es Dokumente, Nachrichten, Bautenstand und finanzielle Kennzahlen
 
@@ -137,19 +145,38 @@ public class AiAssistentController : Controller
         var frageLower = frage.ToLowerInvariant();
         var pbId = AktuellerPartnerBankId;
 
-        // ── Immer: Statistik (auf eigene Partnerbank begrenzt) ───────────────
-        var objekteAnzahl = await _db.Objekte.CountAsync(o => o.PartnerBankId == pbId);
-        var dokumenteAnzahl = await _db.Dokumente.CountAsync(d => d.Objekt.PartnerBankId == pbId);
-        var nachrichtenAnzahl = await _db.Nachrichten.CountAsync(n => n.Objekt.PartnerBankId == pbId);
-        var ungeleseneDoks = await _db.Dokumente
-            .CountAsync(d => d.Objekt.PartnerBankId == pbId && !d.PartnerBankGelesen);
-        var ungeleseneNachr = await _db.Nachrichten
-            .CountAsync(n => n.Objekt.PartnerBankId == pbId && !n.PartnerBankGelesen);
+        // ── Immer: Statistik (Admin: alle, Partnerbank: gefiltert) ───────────
+        var objekteQ = IstAdmin ? _db.Objekte : _db.Objekte.Where(o => o.PartnerBankId == pbId);
+        var dokumenteQ = IstAdmin ? _db.Dokumente : _db.Dokumente.Where(d => d.Objekt.PartnerBankId == pbId);
+        var nachrichtenQ = IstAdmin ? _db.Nachrichten : _db.Nachrichten.Where(n => n.Objekt.PartnerBankId == pbId);
 
-        sb.AppendLine("**Ihre Partnerbank – Bestand:**");
+        var objekteAnzahl = await objekteQ.CountAsync();
+        var dokumenteAnzahl = await dokumenteQ.CountAsync();
+        var nachrichtenAnzahl = await nachrichtenQ.CountAsync();
+
+        sb.AppendLine(IstAdmin ? "**Gesamtbestand (Admin-Sicht):**" : "**Ihre Partnerbank – Bestand:**");
         sb.AppendLine($"- Objekte: {objekteAnzahl}");
-        sb.AppendLine($"- Dokumente: {dokumenteAnzahl} (davon ungelesen: {ungeleseneDoks})");
-        sb.AppendLine($"- Nachrichten: {nachrichtenAnzahl} (davon ungelesen: {ungeleseneNachr})");
+        sb.AppendLine($"- Dokumente: {dokumenteAnzahl}");
+        sb.AppendLine($"- Nachrichten: {nachrichtenAnzahl}");
+
+        if (IstAdmin)
+        {
+            var partnerBanken = await _db.PartnerBanken
+                .OrderBy(p => p.Name)
+                .Select(p => new { p.Name, ObjekteAnzahl = p.Objekte.Count() })
+                .ToListAsync();
+            sb.AppendLine();
+            sb.AppendLine("**Partnerbanken:**");
+            foreach (var p in partnerBanken)
+                sb.AppendLine($"- {p.Name} ({p.ObjekteAnzahl} Objekte)");
+        }
+        else
+        {
+            var ungeleseneDoks = await dokumenteQ.CountAsync(d => !d.PartnerBankGelesen);
+            var ungeleseneNachr = await nachrichtenQ.CountAsync(n => !n.PartnerBankGelesen);
+            sb.AppendLine($"- Ungelesene Dokumente: {ungeleseneDoks}");
+            sb.AppendLine($"- Ungelesene Nachrichten: {ungeleseneNachr}");
+        }
         sb.AppendLine();
 
         // ── Stopwörter für die Begriffsuche ──────────────────────────────────
@@ -198,17 +225,19 @@ public class AiAssistentController : Controller
 
             var objekteTreffer = await _db.Objekte
                 .Include(o => o.Bautraeger)
-                .Where(o => o.PartnerBankId == pbId &&
+                .Include(o => o.PartnerBank)
+                .Where(o => (IstAdmin || o.PartnerBankId == pbId) &&
                     (o.Objektname.Contains(term) ||
                      o.Standort.Contains(term) ||
-                     o.Bautraeger.Name.Contains(term)))
+                     o.Bautraeger.Name.Contains(term) ||
+                     (IstAdmin && o.PartnerBank.Name.Contains(term))))
                 .OrderBy(o => o.Objektname)
                 .Take(6)
                 .ToListAsync();
 
             var dokumenteTreffer = await _db.Dokumente
-                .Include(d => d.Objekt)
-                .Where(d => d.Objekt.PartnerBankId == pbId &&
+                .Include(d => d.Objekt).ThenInclude(o => o.PartnerBank)
+                .Where(d => (IstAdmin || d.Objekt.PartnerBankId == pbId) &&
                     (d.Dateiname.Contains(term) ||
                      d.HochgeladenVon.Contains(term)))
                 .OrderByDescending(d => d.HochgeladenAm)
@@ -222,7 +251,8 @@ public class AiAssistentController : Controller
 
                 foreach (var o in objekteTreffer)
                 {
-                    sb.AppendLine($"- **{o.Objektname}** ({o.Standort}) – Bauträger: {o.Bautraeger?.Name ?? "–"}");
+                    var pbKennung = IstAdmin && o.PartnerBank != null ? $" [{o.PartnerBank.Name}]" : "";
+                    sb.AppendLine($"- **{o.Objektname}**{pbKennung} ({o.Standort}) – Bauträger: {o.Bautraeger?.Name ?? "–"}");
                     sb.AppendLine($"  Status: {o.Status} | Bautenstand: {o.BautenstandProzent:N1} %"
                         + $" | Verkauft: {o.EinheitenVerkauft}/{o.EinheitenGesamt}"
                         + $" | Quote: {o.Verkaufsquote:N1} %");
@@ -234,7 +264,8 @@ public class AiAssistentController : Controller
 
                 foreach (var d in dokumenteTreffer)
                 {
-                    sb.AppendLine($"- 📄 **{d.Dateiname}** (Dokument) – Objekt: {d.Objekt.Objektname}");
+                    var pbKennung = IstAdmin && d.Objekt?.PartnerBank != null ? $" [{d.Objekt.PartnerBank.Name}]" : "";
+                    sb.AppendLine($"- 📄 **{d.Dateiname}** (Dokument){pbKennung} – Objekt: {d.Objekt.Objektname}");
                     sb.AppendLine($"  Kategorie: {d.Kategorie} | Status: {d.Status}"
                         + $" | hochgeladen von {d.HochgeladenVon} am {d.HochgeladenAm:dd.MM.yyyy}");
                 }
@@ -247,7 +278,8 @@ public class AiAssistentController : Controller
         {
             var objekte = await _db.Objekte
                 .Include(o => o.Bautraeger)
-                .Where(o => o.PartnerBankId == pbId)
+                .Include(o => o.PartnerBank)
+                .Where(o => IstAdmin || o.PartnerBankId == pbId)
                 .OrderByDescending(o => o.LetzteAktualisierung)
                 .Take(15)
                 .ToListAsync();
@@ -255,7 +287,8 @@ public class AiAssistentController : Controller
             sb.AppendLine("**Objekte (zuletzt aktualisiert):**");
             foreach (var o in objekte)
             {
-                sb.AppendLine($"- {o.Objektname} ({o.Standort}) | Status: {o.Status}"
+                var pbKennung = IstAdmin && o.PartnerBank != null ? $" [{o.PartnerBank.Name}]" : "";
+                sb.AppendLine($"- {o.Objektname}{pbKennung} ({o.Standort}) | Status: {o.Status}"
                     + $" | Bautenstand: {o.BautenstandProzent:N1} %"
                     + $" | Verkauf: {o.Verkaufsquote:N1} %"
                     + $" | Bauträger: {o.Bautraeger?.Name ?? "–"}");
@@ -266,8 +299,8 @@ public class AiAssistentController : Controller
         if (!trefferGefunden && sucheDokumente)
         {
             var dokumente = await _db.Dokumente
-                .Include(d => d.Objekt)
-                .Where(d => d.Objekt.PartnerBankId == pbId)
+                .Include(d => d.Objekt).ThenInclude(o => o.PartnerBank)
+                .Where(d => IstAdmin || d.Objekt.PartnerBankId == pbId)
                 .OrderByDescending(d => d.HochgeladenAm)
                 .Take(15)
                 .ToListAsync();
@@ -275,8 +308,9 @@ public class AiAssistentController : Controller
             sb.AppendLine("**Dokumente (zuletzt hochgeladen):**");
             foreach (var d in dokumente)
             {
+                var pbKennung = IstAdmin && d.Objekt?.PartnerBank != null ? $" [{d.Objekt.PartnerBank.Name}]" : "";
                 var ungelesen = !d.PartnerBankGelesen ? "● " : "";
-                sb.AppendLine($"- {ungelesen}{d.Dateiname} | Objekt: {d.Objekt.Objektname}"
+                sb.AppendLine($"- {ungelesen}{d.Dateiname}{pbKennung} | Objekt: {d.Objekt.Objektname}"
                     + $" | Kategorie: {d.Kategorie} | Status: {d.Status}"
                     + $" | {d.HochgeladenAm:dd.MM.yyyy}");
             }
@@ -286,8 +320,8 @@ public class AiAssistentController : Controller
         if (!trefferGefunden && sucheNachrichten)
         {
             var nachrichten = await _db.Nachrichten
-                .Include(n => n.Objekt)
-                .Where(n => n.Objekt.PartnerBankId == pbId)
+                .Include(n => n.Objekt).ThenInclude(o => o.PartnerBank)
+                .Where(n => IstAdmin || n.Objekt.PartnerBankId == pbId)
                 .OrderByDescending(n => n.ErstelltAm)
                 .Take(15)
                 .ToListAsync();
@@ -295,9 +329,10 @@ public class AiAssistentController : Controller
             sb.AppendLine("**Nachrichten (zuletzt eingegangen):**");
             foreach (var n in nachrichten)
             {
+                var pbKennung = IstAdmin && n.Objekt?.PartnerBank != null ? $" [{n.Objekt.PartnerBank.Name}]" : "";
                 var ungelesen = !n.PartnerBankGelesen ? "● " : "";
                 var auszug = n.Text.Length > 120 ? n.Text[..120] + "…" : n.Text;
-                sb.AppendLine($"- {ungelesen}[{n.ErstelltAm:dd.MM.yyyy HH:mm}] {n.Absender} @ {n.Objekt.Objektname}: {auszug}");
+                sb.AppendLine($"- {ungelesen}[{n.ErstelltAm:dd.MM.yyyy HH:mm}] {n.Absender}{pbKennung} @ {n.Objekt.Objektname}: {auszug}");
             }
             sb.AppendLine();
         }

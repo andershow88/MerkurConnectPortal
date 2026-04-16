@@ -237,7 +237,7 @@
                 <div class="mc-card-body">
                     @foreach (var msg in Model.LetzteNachrichten)
                     {
-                        <div class="mb-2 p-2 rounded" style="background:#f7f9fc; border:1px solid var(--mc-border);">
+                        <div class="mb-2 p-2 rounded" style="background:var(--mc-bg); border:1px solid var(--mc-border);">
                             <div class="d-flex justify-content-between mb-1">
                                 <span class="fw-semibold" style="font-size:0.8rem;">@msg.Absender</span>
                                 <span class="text-muted" style="font-size:0.72rem;">@msg.ErstelltAm.ToString("dd.MM.yyyy HH:mm")</span>
