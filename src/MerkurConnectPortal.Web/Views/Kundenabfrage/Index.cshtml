@@ -1,0 +1,317 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Kundenabfrage";
+}
+
+<div class="mc-page-header">
+    <div>
+        <h1 class="mc-page-title">
+            <i class="bi bi-building-check me-2" style="color:#c0392b;"></i>
+            Kundenabfrage
+        </h1>
+        <p class="mc-page-subtitle">Firmen-Recherche im deutschen Handelsregister via OpenRegister</p>
+    </div>
+</div>
+
+<div class="mc-card" style="max-width:720px;">
+    <div class="mc-card-body">
+        <label class="form-label fw-semibold small mb-2">
+            <i class="bi bi-search me-1"></i> Firmenname
+        </label>
+        <div style="position:relative;">
+            <input id="kaInput" type="text" class="form-control form-control-lg"
+                   placeholder="z.B. Siemens, Volkswagen, Allianz …"
+                   autocomplete="off"
+                   oninput="kaAutocomplete(this.value)"
+                   onkeydown="kaInputKey(event)"
+                   style="padding-right:3rem;" />
+            <button type="button" class="btn btn-sm"
+                    onclick="kaSuchen()"
+                    style="position:absolute; right:.4rem; top:50%; transform:translateY(-50%);
+                           background:linear-gradient(135deg,#c0392b,#8a281d); color:#fff;
+                           border:none; border-radius:6px; padding:.45rem .9rem; font-weight:600;">
+                <i class="bi bi-search me-1"></i> Suchen
+            </button>
+
+            <!-- Autocomplete-Dropdown -->
+            <div id="kaSuggestions"
+                 style="display:none; position:absolute; top:calc(100% + 4px); left:0; right:0;
+                        background:var(--mc-bg-card); border:1px solid var(--mc-border);
+                        border-radius:var(--mc-radius); box-shadow:var(--mc-shadow-lg);
+                        max-height:340px; overflow-y:auto; z-index:50;"></div>
+        </div>
+        <div style="font-size:.74rem; color:var(--mc-text-muted); margin-top:.5rem;">
+            <i class="bi bi-info-circle me-1"></i> Ab 3 Zeichen werden automatisch Vorschläge geladen. Enter oder „Suchen" für ausführliche Ergebnisliste.
+        </div>
+    </div>
+</div>
+
+<!-- ── Ergebnis-Popup ────────────────────────────────────────────────── -->
+<div id="kaModal"
+     style="display:none; position:fixed; inset:0; z-index:1000;
+            align-items:flex-start; justify-content:center; padding-top:60px;">
+    <div onclick="kaSchliessen()"
+         style="position:absolute; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(3px);"></div>
+
+    <div style="position:relative; width:min(960px,96vw); max-height:calc(100vh - 80px);
+                background:var(--mc-surface); border-radius:16px;
+                box-shadow:0 30px 70px rgba(0,0,0,0.3); display:flex; flex-direction:column;
+                overflow:hidden; border:1px solid var(--mc-border);">
+
+        <div style="padding:1rem 1.5rem; background:linear-gradient(135deg,#c0392b 0%,#8a281d 100%);
+                    display:flex; align-items:center; gap:.75rem; flex-shrink:0;">
+            <i class="bi bi-building-check" style="font-size:1.4rem; color:#ffd280;"></i>
+            <div style="flex:1;">
+                <div style="font-weight:700; color:#fff; font-size:1rem;">Handelsregister-Treffer</div>
+                <div id="kaModalSubtitle" style="font-size:.76rem; color:rgba(255,255,255,.7);">—</div>
+            </div>
+            <button onclick="kaSchliessen()" title="Schließen (Esc)"
+                    style="background:none; border:none; color:rgba(255,255,255,.65);
+                           cursor:pointer; font-size:1.5rem; padding:0; line-height:1;">&times;</button>
+        </div>
+
+        <div id="kaModalBody" style="flex:1; overflow-y:auto; padding:1.25rem 1.5rem;">
+            <div class="text-center py-5" style="color:var(--mc-text-muted);">
+                <div class="spinner-border" style="color:var(--mc-gold);"></div>
+                <p class="mt-3 mb-0 small">Suche läuft…</p>
+            </div>
+        </div>
+
+        <div style="padding:.75rem 1.5rem; border-top:1px solid var(--mc-border);
+                    background:var(--mc-bg); flex-shrink:0; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:.72rem; color:var(--mc-text-muted);">
+                <i class="bi bi-info-circle me-1"></i> Quelle: openregister.de · Handelsregister & Bundesanzeiger
+            </div>
+            <button onclick="kaSchliessen()" class="btn-mc-ghost" style="font-size:.82rem;">Schließen</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // ── State ──────────────────────────────────────────────────────────────────
+    let kaDebounceTimer = null;
+    let kaLastSuggestionRequest = 0;
+    let kaHighlightIdx = -1;
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+    function kaEscape(t) {
+        return String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function kaBadgeStatus(active) {
+        return active
+            ? '<span class="mc-badge badge-success">aktiv</span>'
+            : '<span class="mc-badge badge-secondary">inaktiv</span>';
+    }
+
+    function kaLegalForm(code) {
+        if (!code) return '–';
+        const map = { gmbh:'GmbH', ug:'UG (haftungsbeschränkt)', ag:'AG', kg:'KG', ohg:'OHG',
+            gbr:'GbR', 'gmbh_co_kg':'GmbH & Co. KG', se:'SE', ek:'e.K.', ev:'e.V.' };
+        return map[String(code).toLowerCase()] || String(code).toUpperCase();
+    }
+
+    function kaRegister(c) {
+        const typ = c.register_type || '';
+        const nr  = c.register_number || '';
+        if (!typ && !nr) return '–';
+        return `${typ} ${nr}`.trim();
+    }
+
+    // ── Autocomplete ───────────────────────────────────────────────────────────
+    function kaAutocomplete(val) {
+        const trimmed = (val || '').trim();
+        clearTimeout(kaDebounceTimer);
+        kaHighlightIdx = -1;
+
+        if (trimmed.length < 3) {
+            kaSuggestionsHide();
+            return;
+        }
+
+        kaDebounceTimer = setTimeout(async () => {
+            const reqId = ++kaLastSuggestionRequest;
+            try {
+                const r = await fetch(`/Kundenabfrage/Vorschlaege?q=${encodeURIComponent(trimmed)}`);
+                const data = await r.json();
+                if (reqId !== kaLastSuggestionRequest) return; // veraltete Antwort verwerfen
+                if (data.error) { kaSuggestionsHide(); return; }
+                kaRenderSuggestions(data.results || []);
+            } catch { kaSuggestionsHide(); }
+        }, 220);
+    }
+
+    function kaRenderSuggestions(items) {
+        const box = document.getElementById('kaSuggestions');
+        if (!items.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+        box.innerHTML = items.map((c, i) => `
+            <div class="ka-suggest-item" data-idx="${i}" data-name="${kaEscape(c.name)}"
+                 onclick="kaWaehleVorschlag(this)"
+                 style="padding:.55rem .9rem; cursor:pointer; border-bottom:1px solid var(--mc-border);
+                        display:flex; justify-content:space-between; gap:.75rem; align-items:center;">
+                <div style="min-width:0; flex:1;">
+                    <div style="font-weight:600; font-size:.88rem; color:var(--mc-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${kaEscape(c.name)}
+                    </div>
+                    <div style="font-size:.72rem; color:var(--mc-text-muted); margin-top:.15rem;">
+                        ${kaLegalForm(c.legal_form)} · ${kaEscape(c.register_court || '–')} · ${kaEscape(kaRegister(c))}
+                    </div>
+                </div>
+                <div style="flex-shrink:0;">${kaBadgeStatus(c.active)}</div>
+            </div>
+        `).join('');
+        box.style.display = 'block';
+    }
+
+    function kaSuggestionsHide() {
+        const box = document.getElementById('kaSuggestions');
+        box.style.display = 'none';
+        box.innerHTML = '';
+    }
+
+    function kaWaehleVorschlag(el) {
+        const name = el.getAttribute('data-name');
+        document.getElementById('kaInput').value = name;
+        kaSuggestionsHide();
+        kaSuchen();
+    }
+
+    // ── Tastatur in Input (Enter/Pfeile/Esc) ───────────────────────────────────
+    function kaInputKey(e) {
+        const box = document.getElementById('kaSuggestions');
+        const items = Array.from(box.querySelectorAll('.ka-suggest-item'));
+
+        if (e.key === 'Escape') { kaSuggestionsHide(); return; }
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (kaHighlightIdx >= 0 && items[kaHighlightIdx]) {
+                kaWaehleVorschlag(items[kaHighlightIdx]);
+            } else {
+                kaSuchen();
+            }
+            return;
+        }
+
+        if (items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            kaHighlightIdx = Math.min(kaHighlightIdx + 1, items.length - 1);
+            kaUpdateHighlight(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            kaHighlightIdx = Math.max(kaHighlightIdx - 1, -1);
+            kaUpdateHighlight(items);
+        }
+    }
+
+    function kaUpdateHighlight(items) {
+        items.forEach((el, i) => {
+            el.style.background = i === kaHighlightIdx ? 'rgba(200,169,110,0.15)' : 'transparent';
+        });
+        if (kaHighlightIdx >= 0) items[kaHighlightIdx].scrollIntoView({ block: 'nearest' });
+    }
+
+    // Klick außerhalb schließt Dropdown
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#kaInput, #kaSuggestions')) kaSuggestionsHide();
+    });
+
+    // ── Volltextsuche + Popup ──────────────────────────────────────────────────
+    async function kaSuchen() {
+        const val = document.getElementById('kaInput').value.trim();
+        if (val.length < 2) return;
+        kaSuggestionsHide();
+        kaOeffnen(val);
+
+        try {
+            const r = await fetch('/Kundenabfrage/Suchen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: val })
+            });
+            const data = await r.json();
+
+            if (data.error) {
+                kaZeigeFehler(data.error);
+                return;
+            }
+
+            kaZeigeTreffer(val, data.results || [], data.pagination);
+        } catch (ex) {
+            kaZeigeFehler('Verbindungsfehler: ' + ex.message);
+        }
+    }
+
+    function kaOeffnen(suchtext) {
+        document.getElementById('kaModalSubtitle').textContent = `Suchbegriff: „${suchtext}"`;
+        document.getElementById('kaModalBody').innerHTML =
+            `<div class="text-center py-5" style="color:var(--mc-text-muted);">
+                <div class="spinner-border" style="color:var(--mc-gold);"></div>
+                <p class="mt-3 mb-0 small">Suche läuft…</p>
+             </div>`;
+        document.getElementById('kaModal').style.display = 'flex';
+    }
+
+    function kaSchliessen() {
+        document.getElementById('kaModal').style.display = 'none';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') kaSchliessen(); });
+
+    function kaZeigeFehler(msg) {
+        document.getElementById('kaModalBody').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> ${kaEscape(msg)}
+            </div>`;
+    }
+
+    function kaZeigeTreffer(suchtext, results, pagination) {
+        const anzahl = results.length;
+        const total = pagination?.total_results ?? anzahl;
+        document.getElementById('kaModalSubtitle').textContent =
+            `„${suchtext}" · ${total} Treffer · Anzeige: ${anzahl}`;
+
+        if (anzahl === 0) {
+            document.getElementById('kaModalBody').innerHTML = `
+                <div class="text-center py-5" style="color:var(--mc-text-muted);">
+                    <i class="bi bi-search" style="font-size:2.5rem; opacity:.4;"></i>
+                    <p class="mt-3 mb-0">Keine Firmen zu „${kaEscape(suchtext)}" gefunden.</p>
+                </div>`;
+            return;
+        }
+
+        const rows = results.map(c => `
+            <tr>
+                <td>
+                    <div style="font-weight:600;">${kaEscape(c.name)}</div>
+                    <div class="text-muted" style="font-size:.72rem;">${kaEscape(c.company_id || '')}</div>
+                </td>
+                <td>${kaLegalForm(c.legal_form)}</td>
+                <td>${kaEscape(c.register_court || '–')}</td>
+                <td><code style="font-size:.78rem;">${kaEscape(kaRegister(c))}</code></td>
+                <td>${kaEscape(c.country || '–')}</td>
+                <td>${kaBadgeStatus(c.active)}</td>
+            </tr>`).join('');
+
+        document.getElementById('kaModalBody').innerHTML = `
+            <div class="table-responsive">
+                <table class="mc-table" style="font-size:.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Firma</th>
+                            <th>Rechtsform</th>
+                            <th>Registergericht</th>
+                            <th>Register-Nr.</th>
+                            <th>Land</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }
+</script>
+}

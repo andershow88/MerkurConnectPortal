@@ -95,6 +95,13 @@
                 </a>
             </li>
             <li class="mc-nav-item">
+                <a class="mc-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Kundenabfrage" ? "active" : "")"
+                   asp-controller="Kundenabfrage" asp-action="Index">
+                    <i class="bi bi-building-check"></i>
+                    <span>Kundenabfrage</span>
+                </a>
+            </li>
+            <li class="mc-nav-item">
                 <a class="mc-nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Aktivitaeten" ? "active" : "")"
                    asp-controller="Admin" asp-action="Aktivitaeten">
                     <i class="bi bi-bell"></i>
