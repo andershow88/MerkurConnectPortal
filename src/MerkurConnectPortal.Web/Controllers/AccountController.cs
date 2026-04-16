@@ -55,7 +55,8 @@ public class AccountController : Controller
         var identity = new ClaimsIdentity(claims, "MerkurCookieAuth");
         var principal = new ClaimsPrincipal(identity);
 
-        await HttpContext.SignInAsync("MerkurCookieAuth", principal);
+        await HttpContext.SignInAsync("MerkurCookieAuth", principal,
+            new AuthenticationProperties { IsPersistent = model.MerkenAuf });
 
         if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             return Redirect(model.ReturnUrl);

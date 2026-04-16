@@ -33,6 +33,8 @@ builder.Services.AddScoped<INachrichtService, NachrichtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 
+builder.Services.AddHttpClient();
+
 // Cookie-Authentifizierung
 builder.Services.AddAuthentication("MerkurCookieAuth")
     .AddCookie("MerkurCookieAuth", options =>
